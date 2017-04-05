@@ -1,0 +1,288 @@
+<template>
+  <div>
+    <div class="filter-ct">
+      <div class="filter-input">
+        <div>搜索包含关键词</div>
+        <input type="text" name="" id="searchKeys"  v-model="searchKeys" >
+        <div class="gaojisousuo" v-if="!gaojishow">
+          <p @click="gaojishow=true"><i class="iconfont icon-sousuo_sousuo"></i>高级搜索</p>
+        </div>
+      </div>
+      <div class="gaoji" v-if="gaojishow">
+        <div class="filter-input" style="margin-top:15px">
+          <div>不包含关键词</div>
+          <input type="text" name="" v-model="noQueryKeys">
+        </div>
+        <dl class="filter-btn">
+          <dt>媒体类型</dt>
+          <dd>
+            <ul>
+              <li v-for="(item, index) in messageTypes" :class="{'active':messageIndex == index}"
+                  @click="selectItem(index,'messageType',item)">{{item.itemValue}}
+              </li>
+            </ul>
+          </dd>
+        </dl>
+        <dl class="filter-btn">
+          <dt>情感类型</dt>
+          <dd>
+            <ul>
+              <li v-for="(item, index) in emotionTypes" :class="{'active':emotionIndex == index}"
+                  @click="selectItem(index,'emotionType',item)">{{item.itemValue}}
+              </li>
+            </ul>
+          </dd>
+        </dl>
+        <dl class="filter-btn">
+          <dt>时间范围</dt>
+          <dd>
+            <ul>
+              <li v-for="(item, index) in timeAreas" :class="{'active':timeIndex == index}"
+                  @click="selectItem(index,'timeArea',item)">{{item.itemValue}}
+              </li>
+            </ul>
+          </dd>
+        </dl>
+        <dl class="filter-btn">
+          <dt>相似文章</dt>
+          <dd>
+            <ul>
+              <li :class="{'active':similar}" @click="similar = !similar">合并</li>
+            </ul>
+          </dd>
+        </dl>
+      </div>
+
+      <div class="button-area">
+        <button @click="submit()">确定</button>
+      </div>
+    </div>
+    <v-footerTab></v-footerTab>
+    <!--     <mt-popup id="mt" v-model="searchResMenu" position="right">
+            <detail v-on:fanhuiEvent="recieveMessage"></detail>
+        </mt-popup> -->
+    <mt-popup id="mt" v-model="searchResMenu" position="right">
+      <advancedSearchRes ref="advancedSearchRes" :searchKeys="searchKeys" :noQueryKeys="noQueryKeys" :userId="userId" :timeType="timeType" :sentimentType="sentimentType" :mediaType="mediaType" :flg="flg"  v-on:fanhuiEvent="recieveMessage" v-bind:filter="sendfilter"></advancedSearchRes>
+    </mt-popup>
+
+  </div>
+</template>
+
+<script>
+  //引入组件
+  import Vue from 'vue';
+  import {
+    Popup,
+    Loadmore
+  } from 'mint-ui';
+  import axios from 'axios';
+  import detail from 'components/detail/detail';
+  import advancedSearchRes from 'components/advancedSearchRes/advancedSearchRes';
+  import footerTab from 'components/footerTab/footerTab'
+  import qs from 'qs'
+  //创造构造器
+
+  export default{
+    name: 'advancedSearchFilter',
+    data() {
+      return {
+        messageIndex: 0,
+        emotionIndex: 0,
+        timeIndex: 0,
+        sortIndex: 0,
+        messageTypes: "",
+        emotionTypes: "",
+        timeAreas: "",
+        gaojishow:false,
+        searchResMenu: false,
+        condFilter: {},
+        searchKeys: "",
+        noQueryKeys: "",
+        similar: true,
+        sendfilter: {},
+        userId: "",
+        timeType: "day",
+        sentimentType: 9,
+        mediaType: 0,
+        flg:1
+
+      }
+    },
+    methods: {
+      render: function () {
+        this.userId=this.$store.state.user.userId;
+        var _this = this;
+        axios.post('/userapp/getMastList.do?typeId=001')
+          .then(function (res) {
+            _this.messageTypes = res.data.codeList;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        axios.post('/userapp/getMastList.do?typeId=002')
+          .then(function (res) {
+            _this.emotionTypes = res.data.codeList;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        axios.post('/userapp/getMastList.do?typeId=003')
+          .then(function (res) {
+            _this.timeAreas = res.data.codeList;
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
+      recieveMessage: function (txt) {
+        if (txt == 'advancedSearchRes') {
+          this.searchResMenu = false;
+        }
+      },
+      selectItem: function (index, type, item) {
+        switch (type) {
+          case 'messageType':
+            this.messageIndex = index;
+            this.mediaType=item.itemCode;
+            break;
+          case 'emotionType':
+            this.emotionIndex = index;
+            this.sentimentType=item.itemCode;
+            break;
+          case 'timeArea':
+            this.timeIndex = index;
+            this.timeType=item.itemCode;
+            break;
+          case 'sort':
+            this.sortIndex = index;
+            break;
+          default:
+        }
+
+      },
+      submit: function () {
+        if(this.searchKeys==""){
+          document.getElementById("searchKeys").placeholder="请输入关键词"
+          return
+        };
+        this.searchResMenu = true;
+        if(this.similar==true){
+          this.flg=1;
+        }else{
+          this.flg=2;
+        };
+        this.$refs.advancedSearchRes.gaojisousuofn();
+
+
+      }
+    },
+    components: {
+      Popup,
+      detail,
+      advancedSearchRes,
+      'v-footerTab': footerTab
+    },
+    created() {
+      this.$nextTick(function () {
+        this.render();
+      })
+
+    }
+  }
+
+
+</script>
+
+<style scoped>
+#searchKeys::-webkit-input-placeholder{
+  color: red;
+}
+  #mt {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .mint-popup {
+    /*position: absolute;*/
+  }
+
+  .filter-ct {
+    padding: 15px;
+    overflow: hidden;
+    padding-bottom: 60px;
+  }
+
+  .filter-input > div, .filter-btn dt {
+    height: 40px;
+    line-height: 40px;
+    font-size: 14px;
+  }
+
+  .filter-input > input {
+    width: 100%;
+    border-bottom: 1px solid #D9D9D9;
+
+    height: 25px;
+    line-height: 25px;
+  }
+
+  .filter-btn ul {
+    font-size: 0;
+    width: 110%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn li {
+    min-width: 20%;
+    box-sizing: border-box;
+    padding: 0 1em;
+    margin-right: 3.5%;
+    margin-bottom: 3.5%;
+    border: 1px solid #999;
+    border-radius: 5px;
+    line-height: 35px;
+    font-size: 14px;
+    text-align: center;
+    color: #333;
+  }
+
+  .filter-btn li.active {
+    color: red;
+    border: 1px solid red;
+    background: url(gou.png);
+    background-repeat: no-repeat;
+    background-position: 2px 12px;
+  }
+
+  .button-area {
+    width: 80%;
+    margin: 20px auto;
+  }
+
+  .button-area > button {
+    width: 100%;
+    text-align: center;
+    height: 45px;
+    line-height: 45px;
+    background-color: #ff3333;
+    color: #fff;
+    border-radius: 5px;
+    border: none;
+  }
+ .gaojisousuo{
+   line-height: 44px;
+   color: #ff3333;
+   font-size: 14px;
+ }
+.gaojisousuo p{
+  display: inline-block;
+}
+.gaojisousuo i{
+  width:44px ;
+  height: 44px;
+  margin-right: 5px;
+}
+</style>

@@ -1,0 +1,754 @@
+window.onload = function () {
+  chart1();
+  chart2();
+  chart3();
+  chart4();
+  chart5();
+  chart6();
+}
+
+
+function chart1() {
+  var options = {
+
+    calculable: true,
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+        type: 'line'        // 默认为直线，可选为：'line' | 'shadow'
+      }
+    },
+    legend: {
+      data: ['全部', '新闻', '微信', '微博'],
+      textStyle: {
+        color: '#c8c8c8'
+      },
+      icon: 'circle'
+    },
+    grid: {
+      left: '46',
+      top: '45',
+      right: '46'
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,//折线距离y轴有无距离
+      axisLabel: {
+        textStyle: {
+          fontSize: 12,
+          color: "#8e9091",
+          fontFamily: "微软雅黑"
+        },
+        margin: 10
+      },
+      axisTick: {
+        show: false
+      },
+
+      axisLine: {
+        lineStyle: {
+          color: "#6986c9",
+          type: "solid",
+          opacity: 1
+        }
+      },
+      data: ['07-18', '07-19', '07-20', '07-21', '07-22', '07-23'],
+
+    },
+    yAxis: {
+      type: 'value',
+      interval: 1000,
+      axisLabel: {
+        margin: 10,
+        textStyle: {
+          fontSize: 14,
+          color: "#8e9091",
+          fontFamily: "微软雅黑"
+        },
+        formatter: function (value) {
+          var newValue = value / 1000 + "k";
+          return newValue
+        },
+      },
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        lineStyle: {
+          color: "#6986c9",
+          type: "solid",
+          opacity: 0
+        }
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#ebeef3', //分割线颜色
+          type: "solid",
+          opacity: 1
+        }
+      }
+    },
+    series: [
+      {
+        name: '全部',
+        type: 'line',
+        smooth: false,
+        itemStyle: {normal: {areaStyle: {type: 'default'}}},
+        data: [2000, 2500, 3000, 3500, 2800, 2000],
+        symbolSize: 4,
+        areaStyle: {
+          normal: {
+            opacity: .2
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: '#5eb4e4'
+          }
+        },
+      },
+      {
+        name: '新闻',
+        type: 'line',
+        smooth: false,
+        itemStyle: {normal: {areaStyle: {type: 'default'}}},
+        data: [1000, 1500, 1000, 1500, 1800, 1000],
+        symbolSize: 4,
+        areaStyle: {
+          normal: {
+            opacity: .2
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: '#9d6ab9'
+          }
+        },
+      },
+      {
+        name: '微信',
+        type: 'line',
+        smooth: false,
+        itemStyle: {normal: {areaStyle: {type: 'default'}}},
+        data: [300, 400, 300, 500, 800, 600],
+        symbolSize: 4,
+        areaStyle: {
+          normal: {
+            opacity: .2
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: '#919fdc'
+          }
+        },
+      },
+      {
+        name: '微博',
+        type: 'line',
+        smooth: false,
+        itemStyle: {normal: {areaStyle: {type: 'default'}}},
+        data: [400, 600, 500, 800, 600, 900],
+        symbolSize: 4,
+        areaStyle: {
+          normal: {
+            opacity: .2
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: '#cc374e'
+          }
+        },
+      },
+
+    ]
+  };
+
+  var charts = echarts.init(document.getElementById("chart1"));
+  charts.setOption(options);
+};
+function chart2() {
+  var options = {
+
+    tooltip: {
+      show: true,
+      formatter: "{b}\n{c}",
+    },
+    calculable: true,
+    series: [
+      {
+        name: '',
+        type: 'pie',
+        center: ['50%', '50%'],
+        radius: [60, 61],
+        labelLine: {
+          normal: {
+            show: false
+
+          },
+
+        },
+        data: [{
+          value: 223,
+          itemStyle: {
+            normal: {
+              color: '#cccccc', //颜色填充
+              opacity: 0.5
+            }
+          },
+          tooltip: {show: false}
+        }]
+      },
+
+      {
+        name: '',
+        type: 'pie',
+        center: ['50%', '50%'],
+        radius: [30, 50],
+
+        labelLine: {
+          normal: {
+            length: 6,
+            length2: 30
+          }
+        },
+        label: {
+          normal: {
+            position: 'outside',
+            show: true,
+            formatter: "{b}\n{d}%",
+            textStyle: {
+              fontSize: 12
+            }
+          }
+        },
+        data: [
+          {
+            value: 220,
+            name: '微博',
+            icon: 'circle',
+            itemStyle: {    //数据填充
+              normal: {
+                color: '#ff5757',          //颜色填充
+              }
+            },
+
+
+          },
+          {
+            value: 170, name: '微信', icon: 'circle', itemStyle: {      //数据填充
+            normal: {
+              color: '#ff7e3e',           //颜色填充
+            }
+          },
+
+          },
+          {
+            value: 170, name: '博客', icon: 'circle', itemStyle: {    //数据填充
+            normal: {
+              color: '#0084ff',           //颜色填充
+            }
+          },
+
+          },
+          {
+            value: 160, name: '论坛', icon: 'circle', itemStyle: {   //数据填充
+            normal: {
+              color: '#19d600',           //颜色填充
+            }
+          },
+
+          },
+
+        ]
+      },
+
+    ]
+
+  };
+  var charts = echarts.init(document.getElementById("chart2"));
+  charts.setOption(options);
+};
+function chart3() {
+  var options = {
+    title: {
+      text: '',
+      textStyle: {
+        fontSize: 12
+      }
+    },
+    tooltip: {
+      show: false,
+      trigger: 'axis'
+    },
+    calculable: true,
+    legend: {
+      top: 10,
+      show: false,
+      textStyle: {
+        color: "#333"
+      }
+    },
+    xAxis: [{
+      type: 'category',
+      data: ['新华网', '新浪微博', '海外网', '网易新闻', '西祠胡同'],
+      axisLine: {
+        lineStyle: {
+          color: "#e2e2e2",
+          width: 1
+        }
+      },
+      axisTick: {
+        show: false
+      },
+      axisLabel: {
+        formatter: '{value}'
+        , textStyle: {
+          color: '#8a8a8a',
+          fontSize: '14px'
+        }
+      }, splitLine: {
+        show: false
+      }
+    }],
+    yAxis: [{
+      show: false,
+      type: 'value',
+      name: '',
+      axisLabel: {
+        show: false,
+        formatter: ''
+      }, axisTick: {
+        show: false
+      },
+      axisLine: {
+        lineStyle: {
+          color: "#ccc",
+          width: 1
+        }
+      }
+    }],
+    grid: {
+      x: '30',
+      x2: '30',
+      y: '40',
+      y2: '60'
+    },
+    series: [{
+      type: 'bar',
+      barWidth: '60%',
+      barGap: '80%',
+      data: [
+        {
+          name: '新华网',
+          value: '122',
+          itemStyle: {
+            normal: {
+              color: ['#ff5249']
+            }
+          },
+          label: {
+            normal: {
+              show: true,
+              position: 'top',
+              textStyle: {
+                fontSize: 12,
+              }
+            }
+          }
+
+        },
+        {
+          name: '新浪微博',
+          value: '291',
+          itemStyle: {
+            normal: {
+              color: ['#fe3288']
+            }
+          },
+          label: {
+            normal: {
+              show: true,
+              position: 'top',
+              textStyle: {
+                fontSize: 12,
+              }
+            }
+          }
+        },
+        {
+          name: '海外网',
+          value: '100',
+          itemStyle: {
+            normal: {
+              color: ['#c529ce']
+            }
+          },
+          label: {
+            normal: {
+              show: true,
+              position: 'top',
+              textStyle: {
+                fontSize: 12,
+              }
+            }
+          }
+
+        },
+        {
+          name: '网易新闻',
+          value: '40',
+          itemStyle: {
+            normal: {
+              color: ['8f4ada']
+            }
+          },
+          label: {
+            normal: {
+              show: true,
+              position: 'top',
+              textStyle: {
+                fontSize: 12,
+              }
+            }
+          }
+        },
+        {
+          name: '西祠胡同',
+          value: '120',
+          itemStyle: {
+            normal: {
+              color: ['#5373e3']
+            }
+          },
+          label: {
+            normal: {
+              show: true,
+              position: 'top',
+              textStyle: {
+                fontSize: 12,
+              }
+            }
+          }
+        },
+
+      ]
+    }
+    ]
+  };
+  var charts = echarts.init(document.getElementById("chart3"));
+  charts.setOption(options);
+};
+function chart4() {
+  var options = {
+
+    tooltip: {
+      show: true,
+      formatter: "{b}\n{c}",
+    },
+    calculable: true,
+    series: [
+      {
+        name: '',
+        type: 'pie',
+        center: ['50%', '50%'],
+        radius: [60, 61],
+        labelLine: {
+          normal: {
+            show: false
+
+          },
+
+        },
+        data: [{
+          value: 223,
+          itemStyle: {
+            normal: {
+              color: '#cccccc', //颜色填充
+              opacity: 0.5
+            }
+          },
+          tooltip: {show: false}
+        }]
+      },
+
+      {
+        name: '',
+        type: 'pie',
+        center: ['50%', '50%'],
+        radius: [30, 50],
+
+        labelLine: {
+          normal: {
+            length: 6,
+            length2: 30
+          }
+        },
+        label: {
+          normal: {
+            position: 'outside',
+            show: true,
+            formatter: "{b}\n{d}%",
+            textStyle: {
+              fontSize: 12
+            }
+          }
+        },
+        data: [
+          {
+            value: 220,
+            name: '正面',
+            icon: 'circle',
+            itemStyle: {    //数据填充
+              normal: {
+                color: '#ff5757',          //颜色填充
+              }
+            },
+
+
+          },
+          {
+            value: 170, name: '中性', icon: 'circle', itemStyle: {      //数据填充
+            normal: {
+              color: '#ff7e3e',           //颜色填充
+            }
+          },
+
+          },
+          {
+            value: 170, name: '负面', icon: 'circle', itemStyle: {    //数据填充
+            normal: {
+              color: '#0084ff',           //颜色填充
+            }
+          },
+
+          }
+
+        ]
+      },
+
+    ]
+
+  };
+  var charts = echarts.init(document.getElementById("chart4"));
+  charts.setOption(options);
+
+};
+function chart5() {
+  var options = {
+
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+        type: 'line'        // 默认为直线，可选为：'line' | 'shadow'
+      }
+    },
+    grid: {
+      left: 10,
+      right: 20,
+      bottom: 10,
+      top: 50,
+      containLabel: true
+    },
+    legend: {
+      data: ['正面', '中性', '负面'],
+      right:0,
+      textStyle: {
+        color: '#a9a9a9'
+      },
+      icon: 'circle'
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        show:false,
+        lineStyle: {
+          color: '#01c2db'
+        }
+      },
+      splitLine: {
+        show: false
+      },
+      axisLabel: {
+        textStyle: {
+          color: "#75849c"
+        }
+      },
+      data: ['7-11', '7-12', '7-13', '7-14', '7-15', '7-16']
+
+    },
+    yAxis: {
+      name: '',
+
+      smooth: true,
+      axisTick: {
+        show: false
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#ebeef3', //分割线颜色
+          type: "solid",
+          opacity: 1
+        }
+      },
+      axisLine: {
+        show:false,
+        lineStyle: {
+          color: '#01c2db'
+        }
+      },
+
+    },
+
+    series: [
+      {
+        name: '正面',
+        type: 'line',
+        stack: '总量',
+        smooth: false,
+        symbolSize: 0,
+        areaStyle: {
+          normal: {
+            opacity: .2
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: '#5eb4e4'
+          }
+        },
+        data: [15, 12, 24, 21, 39, 18]
+      },
+      {
+        name: '中性',
+        type: 'line',
+        stack: '总量',
+        smooth: false,
+        symbolSize: 0,
+        areaStyle: {
+          normal: {
+            opacity: .2
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: '#9d6ab9'
+          }
+        },
+        data: [40, 35, 63, 37, 51, 23]
+      },
+      {
+        name: '负面',
+        type: 'line',
+        stack: '总量',
+        smooth: false,
+        symbolSize: 0,
+        areaStyle: {
+          normal: {
+            opacity: .2
+          }
+        },
+        itemStyle: {
+          normal: {
+            color: '#cc374e'
+          }
+        },
+        data: [10, 16, 12, 8, 11, 10]
+      }
+    ]
+  };
+  var charts = echarts.init(document.getElementById("chart5"));
+  charts.setOption(options);
+};
+function chart6() {
+
+  var options = {
+    tooltip: {
+      show:false,
+      trigger: 'item',
+      backgroundColor: 'rgba(255,255,255,0.7)',
+      borderColor: '#ff3333',
+      textStyle: {
+        color: '#333',
+        fontSize: 15
+      },
+      borderWidth: 1,
+      formatter: "<a style='color:#ff0000;font-weight:600; font-size:16px;'>{b}省</a> <br> 诉讼案件<a style='color:#ff5a00;font-weight:600; font-size:16px;'>{c}</a>起",
+      padding: 10,
+    },
+    visualMap: {
+      type: 'piecewise',
+      itemWidth: 10,
+      itemHeight: 12,
+      splitNumber: 4,
+      min: 10,
+      max: 40,
+      left: '30',
+      top: 'bottom',
+      text: ['高', '低'],           // 文本，默认为数值文本
+      calculable: true,
+      color: ['#d43b53','#ffe2d8'],
+    },
+    series: [
+      {
+        name: 'iphone3',
+        type: 'map',
+        mapType: 'china',
+        roam: false,
+        label: {
+          normal: {
+            show: true
+          },
+          emphasis: {
+            show: false
+          }
+        },
+        data: [
+          {name: '北京', selected: false, value: 10},
+          {name: '天津', selected: false, value: 20},
+          {name: '上海', selected: false, value: 30},
+          {name: '重庆', selected: false, value: 40},
+          {name: '河北', selected: false, value: 10},
+          {name: '河南', selected: false, value: 20},
+          {name: '云南', selected: false, value: 30},
+          {name: '辽宁', selected: false, value: 40},
+          {name: '黑龙江', selected: false, value: 10},
+          {name: '湖南', selected: false, value: 20},
+          {name: '安徽', selected: false, value: 30},
+          {name: '山东', selected: false, value: 40},
+          {name: '新疆', selected: false, value: 10},
+          {name: '江苏', selected: false, value: 20},
+          {name: '浙江', selected: false, value: 30},
+          {name: '江西', selected: false, value: 40},
+          {name: '湖北', selected: false, value: 10},
+          {name: '广西', selected: false, value: 20},
+          {name: '甘肃', selected: false, value: 30},
+          {name: '山西', selected: false, value: 40},
+          {name: '内蒙古', selected: false, value: 10},
+          {name: '陕西', selected: false, value: 20},
+          {name: '吉林', selected: false, value: 30},
+          {name: '福建', selected: false, value: 40},
+          {name: '贵州', selected: false, value: 10},
+          {name: '广东', selected: false, value: 20},
+          {name: '青海', selected: false, value: 30},
+          {name: '西藏', selected: false, value: 40},
+          {name: '四川', selected: false, value: 10},
+          {name: '宁夏', selected: false, value: 20},
+          {name: '海南', selected: false, value: 30},
+          {name: '台湾', selected: false, value: 40},
+          {name: '香港', selected: false, value: 10},
+          {name: '澳门', selected: false, value: 20}
+        ],//各省地图颜色数据依赖value
+      }
+    ]
+  };
+  var charts = echarts.init(document.getElementById("chart6"));
+  charts.setOption(options);
+};
+

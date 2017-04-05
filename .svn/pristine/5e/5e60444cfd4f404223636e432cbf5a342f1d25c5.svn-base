@@ -1,0 +1,235 @@
+<template >
+<div class="inwrap" :class="{show:pss}">
+  <div class="inner">
+    <div class="header">
+      <span class='iconfont icon-caret back' @click='close()'></span>
+      <span>推送设置</span>
+      <span class="iconfont icon-jiahao"  @click='edit()'></span>
+    </div>
+    <div class="tablelist">
+      <div v-for="(item , key , index ) in entityList">
+          <div class="top">
+            <div class="right">
+              <p class="name">{{item.themeName}}</p>
+              <p class="keywords" >
+                  <span>关键字</span>
+                  <span v-for="i in item.keyWords">{{i}} </span>
+              </p>
+            </div>
+            <mt-switch v-model="item.isuse"></mt-switch>
+          </div>
+          <div class="bottom">
+             <span @click='edit(item)'>编辑</span>
+             <span @click='del(key)'>删除</span>
+          </div>
+      </div>
+
+    </div>
+    <footerTab></footerTab>
+  </div>
+  <NewPush :editem='editem' ref="NewPush"></NewPush>
+</div>
+</template>
+<script>
+import {
+  fetchThemeList
+} from '../store/personalCenter.js';
+import footerTab from 'components/footerTab/footerTab';
+import Mgedit from './SubjectMgEdit.vue';
+import NewPush from './NewPush.vue';
+import store from '../../../store';
+import { MessageBox } from 'mint-ui';
+import axios from 'axios';
+import qs from 'qs';
+export default {
+  data() {
+    return {
+      entityList: [],
+      editem: {},
+      myps: this.pss
+    }
+  },
+  props:['pss'],
+  watch: {
+   pss(val) {
+     this.myps = val;
+    },
+    myps(val){
+       this.$emit("on-ps-change",val)
+    }
+  },
+  methods: {
+    edit(item) {
+      if (item) {
+        this.editem = item
+      } else {
+        this.editem = ""
+      }
+      this.$store.commit('increment')
+      console.log(this.$refs)
+      this.$refs.NewPush.init();
+      // this.$store.commit('setEditContent',item)
+    },
+    fetchTheme(num) {
+      num?num:0
+      var _this=this
+       axios.post('/warnapp/getWarnConfigList',qs.stringify({'userId':this.$store.state.user.userId,pageNum:num})).then(function (res) {
+           if(res.data.code==0){
+             _this.entityList=res.data.entityList
+           }
+        });
+
+    },
+    del(i) {
+      let _this=this
+      MessageBox.confirm('确定执行此操作?').then(action => {
+         _this.entityList.splice(i, 1)
+      });
+
+    },close(){
+      this.myps=!this.myps
+    }
+  },
+  mounted: function() {
+    // document.ontouchmove = function(e){ e.preventDefault(); }
+  },
+  components: {
+    NewPush,
+    footerTab
+  },
+  store
+}
+</script>
+
+<style lang="css" scoped>
+.aaa{
+  background: yellow
+}
+.inwrap{
+    position: fixed;
+    top: 0;
+    right:0;
+    bottom:0px;
+    left:0;
+    background: #fff;
+    display: none;
+    z-index: 2000;
+}
+.inner{
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+div.show{
+  display: block;
+}
+.header{
+  height: 50px;
+  background: #ccc;
+  line-height: 50px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  background: #1c2532;
+   color: #fff;
+   font-size: 18px;
+}
+.header .icon-jiahao{
+  font-size: 26px;
+
+}
+.header .back{
+  font-size: 32px;
+  transform: rotate(90deg);
+  display: inline-block;
+}
+.mint-popup{
+  width: 100vw;
+  height: calc(100vh - 60px);
+  margin-top:-30px;
+  box-sizing: border-box;
+  /*background: transparent;*/
+  z-index: -1;
+}
+.btnbox{
+  display: flex;
+  height: 40px;
+  font-size: 1.3rem;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+.tablelist{
+  flex:1;
+  background: #f0f0f0;
+  overflow-y: auto;
+}
+.tablelist>div{
+ background: #fff;
+ margin-top: 15px;
+ padding-top: 15px;
+ display: flex;
+ box-sizing: border-box;
+ justify-content: space-between;
+ flex-direction: column;
+}
+.tablelist .top{
+  display: flex;
+  justify-content: space-between;
+  padding: 0 15px;
+  align-items: flex-start;
+}
+.tablelist .bottom{
+  padding: 10px 0;
+  border:1px solid #dbdbdb;
+  border-width: 1px 0;
+  display: flex;
+
+  align-content: center;
+}
+.tablelist .bottom span{
+  flex: 1;
+  display: flex;
+ justify-content: center;
+ font-size: 15px;
+ color: #ff3333;
+
+}
+.mint-switch-input:checked + .mint-switch-core {
+    border-color: #4cd964;
+    background-color: #4cd964;}
+.mint-switch-core{
+  width: 50px;
+  height: 30px;
+}
+.mint-switch-core::after{
+  width: 28px;
+  height: 28px;
+}
+.tablelist .bottom span:nth-child(1){
+  border-right: 1px solid #dbdbdb;
+}
+.tablelist .right{
+  display: flex;
+  width: 80%;
+  flex-direction: column;
+
+}
+.tablelist>div .name{
+  font-size: 18px;
+  color: #000;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.tablelist>div .keywords{
+  font-size: 13px;
+  color: #8a8a8a;
+  margin-bottom: 10px;
+}
+.footerTab{
+  position: static!important;
+}
+</style>

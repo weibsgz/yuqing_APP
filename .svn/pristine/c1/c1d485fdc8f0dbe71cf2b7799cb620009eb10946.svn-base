@@ -1,0 +1,385 @@
+<template lang="html">
+  <div class="yuqingdongtai yqdt inwrap" :class="{show:$store.state.personal.flag3}" >
+		  <div class="header">
+		    <span class='iconfont icon-caret back' @click='close()'></span>
+		    <span>收藏夹</span>
+		  	<span class=""></span>
+		  </div>
+		  <div class="content">
+		    <mt-loadmore :top-method="loadTop" :bottom-method="loadBottom" :auto-fill="false" ref="loadmore">
+		        <ul class="ulNews">
+		            <li v-for="(item,index) in news" style="">                	
+		                <div class="newstop" @click='openDetail(item)'>
+		                    <span v-html="item.title"></span>                           
+		                    <span class="tag" :class="classMap[item.sentimentType-1]">
+		                	{{item.sentimentType | newsTag}}</span>
+		                </div>
+		                <div class="newsMenu">
+		                    <!-- <span>信息类型:{{item.type}}</span> -->
+		                    <span>来源：{{item.threadStarter}}</span>
+		                    <span class="time">{{item.publishTime }}</span>
+		                </div>
+		            </li>
+		        </ul>
+		     
+		        <div slot="top" class="mint-loadmore-top">
+		            <span v-show="topStatus !== 'loading'" :class="{ 'rotate': topStatus === 'drop' }">松开加载最新数据</span>
+		            <span v-show="topStatus === 'loading'">加载完毕</span>
+		        </div>
+		      
+		    </mt-loadmore>
+			</div>
+	    <mt-popup id="mt" v-model="popupVisibleContent" position="right" >
+	        <!-- <div :detail="detail" class="detail-wrapper">{{detail.detail}}</div> -->
+	        <!-- <detail :userId="userId"  v-on:closePanel="recieveMessage" ref="detail"></detail> -->
+	        <router-view :userId="userId" :articleId="articleIditem" v-on:closePanel="recieveMessage"></router-view>
+	    </mt-popup>
+	
+	    <mt-popup id="mt2" v-model="popupVisibleSearchRes" position="right">
+	        <advancedSearchRes v-on:fanhuiEvent="recieveMessage"></advancedSearchRes>
+	    </mt-popup>
+	    <v-footerTab></v-footerTab>
+	</div>
+</div>
+
+</template>
+<script>
+import {
+  fetchLogs
+} from '../store/personalCenter';
+import Vue from 'vue'
+import { mapState } from 'vuex'
+import BScroll from 'better-scroll'
+import {
+    Popup,
+    Loadmore
+} from 'mint-ui';
+import detail from 'components/detail/detail';
+import condFilter from 'components/condFilter/condFilter';
+import footerTab from 'components/footerTab/footerTab';
+import advancedSearchRes from 'components/advancedSearchRes/advancedSearchRes';
+import axios from 'axios';
+import qs from 'qs'
+import store from '../../../store'
+
+export default {
+    data() {
+        return {
+            news: [],
+            classMap: ['danger', 'middle', 'safe'],
+            allLoaded: false,
+            condFilter: {},
+            popupVisibleContent: false,
+            popupVisibleSearchRes:false,
+            selectedPage: {},
+            themeId:"",
+            topStatus: '',
+            articleId:"123456",
+            articleIditem:"",
+            userId:"",
+            page: 1,
+            pageSize: 10
+        }
+    },
+    created() {
+        this.$nextTick(function() {
+            this.render();
+        })
+    },
+    computed:mapState({ user: state => state.user }),
+
+    methods: {
+		    getLogs() {
+			      fetchLogs().then(data => {
+			        this.logs = eval(data)
+			      })
+		    },
+		    close() {
+		      store.commit('increment3')
+		    },
+			    
+        //调取关键词接口
+        renderKeywords:function(){
+            let userId = this.user.userId;               
+            return axios.post('/themeapp/getTheme',qs.stringify({'userId':userId}));
+        },
+        //调取新闻列表接口
+        renderList:function(themeId){
+            let userId = this.user.userId;
+            this.userId = this.user.userId;
+            let _themeId;
+            _themeId = themeId?themeId:"";
+            return axios.post('/themeapp/queryThemeArticle',
+                qs.stringify({
+                    'userId':userId,
+                    'themeId':_themeId,
+                    'page':this.page,
+                    'pageSize':this.pageSize
+            }));
+        },
+
+        render: function() {
+            /*var _this = this;                
+            axios.get('static/data/yuqingdongtai.json', {
+                    params: {
+                        page: this.page
+                    }
+                })
+                .then(function(res) {
+                    //console.log(res)
+                    _this.news = res.data.news;
+                    _this.keyWords = res.data.keyWords
+                    _this.condFilter = res.data.condFilter;
+                })
+                .catch(function(error) {
+                    console.log(error);
+            });*/
+           
+            
+            var _this = this; 
+            axios.all([this.renderKeywords(),this.renderList()])
+            .then(axios.spread(function(keywordRes,list){
+                //两个请求现在都完成
+                 _this.keyWords = keywordRes.data.themeList;
+                 //_this.news = list.data.resultList;
+                 _this.news = (_this.news).concat(list.data.resultList);
+                 //默认设置keywords列表中第一个的themeId
+                 _this.themeId = keywordRes.data.themeList[0].themeId;
+                 _this.allLoaded = true; // 若数据已全部获取完毕
+                 _this.$refs.loadmore.onBottomLoaded();
+                console.log("列表返回： "+JSON.stringify( _this.news))
+            }));
+        },
+        
+        openDetail: function(item) {
+            this.popupVisibleContent = true;
+            //this.selectedPage = item;
+            this.articleId = item.id;
+            this.articleIditem = item.id;
+            //this.$router.push('/detail');
+            this.$router.push({name: 'detail', params: {id: item.id,userId:this.userId}});
+               
+            console.log("this.articleId："+this.articleId);
+            //this.$refs.detail.renderDetail(this.articleId);
+
+        },
+        
+        recieveMessage: function(txt) {
+            if (txt === 'close') {
+                this.popupVisibleContent = false;
+            } 
+            else if(txt == 'advancedSearchRes'){
+            	this.popupVisibleSearchRes = false;
+            }
+        },
+
+        recieveCondFilter: function(value) {
+            alert(value)
+            console.log(value)
+        },
+        
+        handleTopChange(status) {
+
+            this.topStatus = status;
+        },
+
+        loadTop(id) {
+            //刷新列表
+            this.page = 1;
+            this.news.length = 0;
+            this.render();
+            this.$refs.loadmore.onTopLoaded();
+        },
+        
+        loadBottom(id) {
+            // 加载更多数据
+
+            console.log('正在上拉加载。。')
+
+            let nextPage = this.page++
+            this.render();
+
+           /* var _this = this;
+
+            let pageup = this.page++;
+            axios.get('static/data/yuqingdongtai.json', {
+                    params: {
+                        page: pageup
+                    }
+                })
+                .then(function(res) {
+                    console.log('上拉中的axios读取成功');
+                    _this.news.push(
+                        ...res.data.news2
+                    )
+                    _this.allLoaded = true; // 若数据已全部获取完毕
+                    _this.$refs.loadmore.onBottomLoaded();
+
+                    ;
+                })
+                .catch(function(error) {
+                    console.log(error);
+                });*/
+
+            //this.news = (this.news).concat(this.news);
+
+        }
+    },
+    filters: {
+        newsTag: function(value) {
+            switch (value) {
+                case "9":
+                    return '全部'
+                    break;
+                case "1":
+                    return '负面'
+                    break;
+                case "2":
+                    return '中性'
+                    break;
+                case "3":
+                    return '正面'
+                    break;
+                default:
+
+            }
+        }
+    },
+    components: {
+        Popup,
+        detail,
+        condFilter,
+        advancedSearchRes,
+        'v-footerTab': footerTab
+    }
+}
+
+</script>
+
+<style scoped>
+.inwrap{
+      position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0px;
+    left: 0;
+    background: #fff;
+    display: none;
+    z-index: 2000;
+    
+}
+.header{
+  height: 50px;
+  background: #ccc;
+  line-height: 50px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  background: #1c2532;
+   color: #fff;
+   font-size: 18px;
+}
+.header .icon-jiahao{
+  font-size: 26px;
+
+}
+.header .back{
+  font-size: 32px;
+  transform: rotate(90deg);
+  display: inline-block;
+}
+
+/*.mint-loadmore{height:calc(100vh - 110px) }*/
+#mt,#mt1,#mt2{height: 100vh; width: 100vw;}
+#app{
+    display: flex;
+}
+.footTab{
+    position: static;
+}
+.yqdt {
+	display: none;
+}
+.yqdt.show{
+  display: block;
+}
+.yqdt .top {
+    display: flex;
+    height: 40px;
+    line-height: 40px;
+    background-color: #1c2532;
+    position: fixed;
+    width: 100%;
+    z-index: 999;
+    overflow: hidden;
+}
+
+.content {
+		flex: 1;
+    overflow-y: auto;
+    height: calc(100vh - 100px);
+}
+.yqdt .content ul li {
+    padding: 10px;
+    box-sizing: border-box;
+  	/*height: 100px;*/
+    border-bottom: 1px solid #ccc;
+}
+
+.yqdt .content ul li .newstop {
+    width: 100%;
+    margin-bottom: 15px;
+    line-height: 24px;
+    font-size: 16px;
+   /* overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;*/
+}
+
+.yqdt .content ul li .newstop .tag {
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-size: 12px;
+}
+
+.yqdt .content ul li .newsMenu {
+    display: flex;
+}
+
+.yqdt .content ul li .newsMenu span {
+    flex: 1;
+    color: #8a8a8a;
+    font-size: 14px;
+}
+
+.yqdt .content ul li .newsMenu span.time {
+    flex: 1;
+}
+
+.tag.middle {
+    color: #fff;
+    background-color: #55a4e1;
+ 
+}
+
+.tag.danger {
+    color: #fff;    
+    background-color: #ff6c6c
+}
+
+.tag.safe {
+    color: #fff;
+    background-color: #35c870
+}
+
+.icon-caret {
+    transition: all 1s;
+    margin-top: -1px;
+}
+
+.yqdt .top {}
+.mint-loadmore-top{
+    /*margn-top:0;*/
+}
+.yqdt .content ul li.moreSimilar{ border-bottom: none; text-align: center; font-size: 14px; color: #ff3333; }
+</style>

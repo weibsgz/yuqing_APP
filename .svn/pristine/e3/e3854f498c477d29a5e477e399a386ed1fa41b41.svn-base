@@ -1,0 +1,127 @@
+<template>
+  <div>
+    <input placeholder="请输入手机号" type="number" v-model.trim="ruleForm.phone" v-on:blur="showMsg('0')">
+    <div v-show="!!isSubmit[0]&&!!phoneMsg">{{phoneMsg}}</div>
+    <input placeholder="短信验证码" type="number" v-model.trim="ruleForm.code" v-on:blur="showMsg('1')">
+    <div v-show="!!isSubmit[1]&&!!codeMsg">{{codeMsg}}</div>
+    <button v-on:click="sendCode">发送验证码</button>
+    <input placeholder="6~12位字母和数字组合" type="password" v-model.trim="ruleForm.password" v-on:blur="showMsg('2')">
+    <div v-show="!!isSubmit[2]&&!!passwordMsg">{{passwordMsg}}</div>
+    <input placeholder="请确认密码" type="password" v-model.trim="ruleForm.confirm" v-on:blur="showMsg('3')">
+    <div v-show="!!isSubmit[3]&&!!conPasswordMsg">{{conPasswordMsg}}</div>
+    <mt-button type="danger"  @click.native="register" size="large">注册</mt-button>
+    </div>
+</template>
+
+<script>
+  //引入组件
+  import Vue from 'vue'
+  import { MessageBox,Toast  } from 'mint-ui';
+  import {USER_SIGNIN} from 'store/user'
+  import axios from 'axios'
+
+
+  //创造构造器
+  export default {
+    data() {
+      return {
+        ruleForm: {
+          phone: '',
+          code: '',
+          password:'',
+          confirm:''
+        },
+        isSubmit:[]//默认不显示报错
+      }
+    },
+    // computed property for form validation state
+    computed: {
+      phoneMsg:{
+        get: function() {
+          if (!this.ruleForm.phone) {
+            return '请输入手机号'
+          }else if( this.ruleForm.phone.toString().length != 11){
+            return '请输入有效的手机号码'
+          }else{
+            return false;
+          }
+        }
+      },
+      codeMsg:{
+        get: function() {
+          if (!this.ruleForm.code) {
+            return '请输入验证码'
+          }else{
+            return false;
+          }
+        }
+      },
+      passwordMsg:{
+        get: function() {
+          if (!this.ruleForm.password) {
+            return '请输入密码'
+          }else if(!/^[A-Za-z0-9]+$/.test(this.ruleForm.password) || this.ruleForm.password.length < 6||this.ruleForm.password.length>12){
+            return '密码只能是6~12位的英文和数字组合'
+          }else{
+            return false;
+          }
+        }
+      },
+      conPasswordMsg:{
+        get: function() {
+          if (!this.ruleForm.confirm) {
+            return '请输入密码'
+          }else if(!/^[A-Za-z0-9]+$/.test(this.ruleForm.confirm) || this.ruleForm.confirm.length < 6||this.ruleForm.confirm.length>12){
+            return '密码只能是6~12位的英文和数字组合'
+          }else{
+            if (ruleForm.password !== ruleForm.confirm) {
+              return '两次确认密码不一致'
+            }
+            return false;
+          }
+        }
+      }
+    },
+    methods:{
+      register(){
+        var _this=this;
+        axios.post('register/saveRegister',qs.stringify({"phone": this.ruleForm.phone,"code":this.ruleForm.code,"password":this.ruleForm.password}))
+          .then(function(res){
+            if(res.data.code==0){
+              Toast({
+                message: '注册成功',
+                iconClass: 'iconfont icon-gou'
+              });
+              _this.$router.replace({path: '/login'})
+            }
+          })
+          .catch(function(err){
+            console.log(err);
+          })
+      },
+      showMsg(the){
+        this.isSubmit[the]=true;//打开当前校验显示
+        //console.log(the);
+      },
+      sendCode:function () {
+        if(!this.ruleForm.phone){
+          MessageBox('提示', '请输入手机号');
+          return;
+        }
+        axios.post('register/getYZM', qs.stringify({"phone": this.ruleForm.phone})).then(function (res) {
+          if(res.data.code==0){
+            Toast({
+              message: '发送成功',
+              iconClass: 'iconfont icon-gou'
+            });
+          }
+        });
+        // axios.post('register/getYZM', qs.stringify({  "phone": this.ruleForm.phone}));
+      }
+    }
+  }
+</script>
+
+<style>
+
+</style>

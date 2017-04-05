@@ -1,0 +1,53 @@
+<template>
+  <div class="seller">
+    this is 消息提醒
+    <div class="login-msg" v-if="!user.id">
+      <router-link to="/login">你还未登录，请先登录</router-link>
+    </div>
+    <router-link to="/register">注册</router-link>
+    <div class="msg" v-if="user.id">
+      <br>
+      哈哈，恭喜你已经入坑Vue2-------{{user.id}}
+    </div>
+
+    <router-link to="/signout">退出登录</router-link>
+<button v-on:click="share">分享</button>
+
+    <v-footerTab></v-footerTab>
+  </div>
+
+</template>
+
+<script>
+  import Vue from 'vue'
+  import { mapState } from 'vuex'
+  import { Popup } from 'mint-ui';
+  import footerTab from 'components/footerTab/footerTab'
+  import share from 'components/share/index'
+
+  export default {
+    data() {
+      return {
+        popupShareVisible: false,//初始不显示弹出框
+      }
+    },
+    components: {
+      'v-footerTab':footerTab,
+      'v-share': share,
+    },
+    methods:{
+      share: function () {
+//        this.isActive2 = !this.isActive2;
+//        this.isActive1 = false;
+//        this.seen2 = false;
+        this.popupShareVisible = true;
+      }
+    },
+    computed: mapState({ user: state => state.user })
+  }
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style >
+
+</style>

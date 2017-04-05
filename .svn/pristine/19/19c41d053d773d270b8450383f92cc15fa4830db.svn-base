@@ -1,0 +1,224 @@
+<style lang="less" scoped>
+.loginWrapper{
+	font-family: "微软雅黑";
+	background-image:url(login-bg.png);
+	background-repeat:no-repeat;
+	background-size:cover;
+	height: 100%;
+	padding:0 1rem;
+}
+.logoWrapper{
+	height:12.5rem;
+	width: 100%;
+	text-align: center;
+	position: relative;
+}
+.logoWrapper img{
+	width:5rem;
+	height:5rem;
+	position: absolute;
+	top:50%;
+	left:50%;
+	margin-top:-2.5rem;
+	margin-left:-2.5rem;
+}
+.infoBox{
+	background-color: rgba(15,9,34,.5);
+	height:7.6rem;
+	border-radius:2px;
+}
+.userWrapper{
+	border-bottom:1px solid #110508;
+	height:3.8rem;
+	overflow: hidden;
+}
+.userWrapper input,.pwdWrapper input{
+	background: transparent;
+	outline: none;
+	color: #fff;
+	font-size:1rem;
+	height:1.2rem;
+	border:none;
+	/*border-left:1px solid #Fff;*/
+	margin-top: 1.4rem;
+	padding-left: 1.4rem;
+}
+input::-webkit-input-placeholder{
+	color:#fff;
+}
+.icon-password,.icon-user{
+	float: left;
+	width:4rem;
+	text-align: center;
+	font-size: 1.3rem;
+	margin-top:1.3rem;
+	color:#fff;
+	margin-left:1rem;
+	border-right:1px solid #Fff;
+}
+.userWrapper div,.pwdWrapper div{
+	color:#Fff;
+	font-size: 0.6rem;
+	float:left;
+}
+.userWrapper p,.pwdWrapper p{
+	margin-left:1.4rem;
+	/*margin-top:0.2rem;*/
+	color:#ff3333;
+}
+.pwdWrapper{
+	overflow: hidden;
+}
+.forgetPwd{
+	height:2.2rem;
+	color:#ff3333;
+	font-size:0.8rem;
+	text-align: right;
+	margin-top:0.8rem;
+	margin-right:0.6rem;
+}
+.loginBtn,.signinBtn{
+	font-family: "微软雅黑";
+	height:3rem;
+	font-size: 0.9rem;
+	color:#fff;
+	background-color:#ff3333;
+	width: 100%;
+	border-radius:2px;
+	margin-bottom:1rem;
+}
+.signinBtn{
+	background-color: rgba(15,9,34,.5);
+	font-family: "微软雅黑";
+}
+</style>
+<template>
+  <div class="loginWrapper">
+  	<div class="logoWrapper">
+  		<img src="./logo.png"/>
+  	</div>
+  	<div class="infoBox">
+	    <div class="userWrapper">
+	    	<i class="iconfont icon-user"></i>
+		    <div>
+		      <input placeholder="请输入账号" type="number" v-model.trim="form.id" v-on:blur="showMsg('0')">
+	      	<p v-show="!!isSubmit[0]&&!!phoneMsg">{{phoneMsg}}</p>
+      	</div>
+	    </div>
+	    <div class="pwdWrapper">
+		    <i class="iconfont icon-password"></i>
+	    	<div>
+		      <input placeholder="请输入密码" type="password" v-model.trim="form.password" v-on:blur="showMsg('1')">
+	      	<p v-show="!!isSubmit[1]&&!!passwordMsg">{{passwordMsg}}</p>
+		    </div>
+	    </div>
+	  </div>
+    <router-link to="/resetPwd"><div class="forgetPwd">忘记密码</div></router-link>
+    <mt-button type="default" class="loginBtn" @click.native="submitLogin">{{ status ? '正在登录中...' : '登录' }}</mt-button>
+    <router-link to="/register"><mt-button  class="signinBtn">立即注册</mt-button></router-link>
+    <Mgedit :editem='editem' :themesList='themesList' :isStart="isStart"></Mgedit>
+  </div>
+</template>
+<script>
+  import Vue from 'vue';
+  import { Button,Toast } from 'mint-ui';
+  import {mapActions} from 'vuex'
+  import {USER_SIGNIN} from 'store/user'
+  import axios from 'axios'
+  import Mgedit from './../../components/personalCenter/components/SubjectMgEdit.vue'
+  import qs from 'qs'
+  import router from './../../router'
+  Vue.component(Button.name, Button);
+  export default {
+    data() {
+      return {
+        status: false, //true 已经提交过， false没有提交过
+        form: {
+          id: '18511589156',
+          password: '1q2w3e'
+        },
+        editem: {},
+        themesList: [],
+        isSubmit:[],//默认不显示报错,
+        isStart:true
+      }
+    },
+    components: {
+      Mgedit
+    },
+    // computed property for form validation state
+    computed: {
+      phoneMsg:{
+        get: function() {
+          if (!this.form.id) {
+            return '请输入手机号'
+          }else if( this.form.id.toString().length != 11){
+            return '请输入有效的手机号码'
+          }else{
+            return false;
+          }
+        }
+      },
+      passwordMsg:{
+        get: function() {
+          if (!this.form.password) {
+            return '请输入密码'
+          }else if(!/^[A-Za-z0-9]+$/.test(this.form.password) || this.form.password.length < 6||this.form.password.length>12){
+            return '密码只能是6~12位的英文和数字组合'
+          }else{
+            return false;
+          }
+        }
+      }
+    },
+    methods: {
+      ...mapActions([USER_SIGNIN]),
+    submitLogin() {
+      if (!!this.phoneMsg || !!this.passwordMsg)  {return}
+      this.status = true
+      var _this=this;
+      axios.post('loginapp/loginInfo', qs.stringify({'phone':_this.form.id,'password':_this.form.password})).then(function (res) {
+        if(res.data.code==0){
+          console.log(res.data)
+         // var json = {};
+          //json = eval('('+(JSON.stringify(_this.form)+JSON.stringify(res.data)).replace(/}{/,',')+')');
+          _this.form.userId=res.data.userId;
+          _this.form.userName=res.data.userName;
+          _this.form.stopeTime=res.data.stopeTime;
+          _this.form.versionName=res.data.versionBean.versionCode;
+          _this.USER_SIGNIN(_this.form)
+          Toast({
+            message: '登录成功',
+            iconClass: 'iconfont icon-gou'
+          });
+          if(res.data.themeFlg==1){
+            _this.$router.replace({ path: '/yuqingdongtai' })
+//            window.location.reload();
+          }else {
+            _this.edit()
+          }
+        }
+        _this.status = false
+      });
+    },
+    register(){
+      this.$router.replace({path: '/register'})
+    },
+    resetPwd(){
+      this.$router.replace({path: '/resetPwd'})
+    },
+    showMsg(the){
+      this.isSubmit[the]=true;//打开当前校验显示
+    },
+    edit(item) {
+      if (item) {
+        this.editem = item
+      } else {
+        this.editem = ""
+      }
+      this.$store.commit('increment')
+      // this.$store.commit('setEditContent',item)
+    },
+  }
+  }
+</script>

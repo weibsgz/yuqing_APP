@@ -1,0 +1,68 @@
+/**
+ * Created by zeng on 2017/2/27.
+ */
+//判断是浏览器还是APP中
+var isAppClient= function(){
+  var ua = navigator.userAgent;
+  var isAppClient = ((ua.indexOf('AndroidOpinionClient')>-1) || (ua.indexOf('iOSOpinionClient')>-1));
+  if(isAppClient) {
+    return true;
+  }else {
+    return false;
+  }
+}()
+//判断是浏览器还是APP中
+var isAndorid= function(){
+  var ua = navigator.userAgent;
+  var isAndorid = (ua.indexOf('AndroidOpinionClient')>-1);
+  if(isAndorid) {
+    return true;
+  }else {
+    return false;
+  }
+}()
+var isIOS= function(){
+  var ua = navigator.userAgent;
+  var isAndorid = (ua.indexOf('iOSOpinionClient')>-1);
+  if(isAndorid) {
+    return true;
+  }else {
+    return false;
+  }
+}()
+global.version=function (ver) {
+  return '<var>new</var>'+ver;
+};
+
+global.isQQInstall="";global.isWechatInstall="";
+global.checkInstall=function (isQQ,isWechat) {
+  // if(!!isQQInstall){
+  //   alert("安装QQ了")
+  // }
+  // if(!!isWechatInstall){
+  //   alert("安装weixin了")
+  // }
+  // alert(321)
+  document.getElementById("chupdaate").innerHTML=version;
+  global.isQQInstall=isQQ;
+  global.isWechatInstall=isWechat;
+    // alert(global.isQQInstall)
+};
+global.isupdate=function (type,ver){//0、无更新1、有更新
+  if(type==0){
+    alert('无更新')
+  }else {
+    let version='<var>new</var>'+ver;
+    document.getElementById("chupdaate").innerHTML=version;
+    alert('有更新，版本号为：'+ver)
+  }
+}
+
+setTimeout(function () {
+  // global.isupdate()
+  global.checkInstall(1,1)
+},5000)
+
+export {isAppClient,isAndorid,isIOS}
+
+

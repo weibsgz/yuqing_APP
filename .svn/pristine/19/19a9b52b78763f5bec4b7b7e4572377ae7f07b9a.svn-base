@@ -1,0 +1,1793 @@
+<template>
+  <div class="ratings">
+    <div class="title">
+      <h2>
+        <div class="bigTitle" v-on:click="openMenu()">
+          <span>{{BigthemeName}}</span>
+          <i v-if="isicon" class="iconfont icon-caret"></i>
+          <i v-if="!isicon" class="icon-shangla  iconfont"></i>
+        </div>
+        <ul class="bigTitle-item" v-if="seen && themeList.length > 1">
+          <li v-for="(item,index) in themeList" class="border-bottom-1"  @click="changeBigTitle(item)">{{item.themeName}}</li>
+        </ul>
+        <div class="mengceng1" v-if="ismengcengshow" @click="fnMengcengshow()"></div>
+        <div class="mengceng1" v-if="ismengcengshow2" @click="fnMengcengshow2()"></div>
+      </h2>
+      <i class="time iconfont icon-shijian1 " v-bind:class="{ active:isActive1}" v-on:click="time"></i>
+      <i class="share iconfont icon-fenxiang" v-bind:class="{active:isActive2}" v-on:click="share" v-if="isAppClient"></i>
+    </div>
+    <div class="timeSelect":class="{'newZindex':newZindex}" v-if="seen2">
+      <div class="timeSelect-left">时间范围</div>
+
+      <div class="timeSelect-right-dom">
+        <div v-for="(item,index) in times" class="timeSelect-right" @click="stime(index,item)">
+          <div class="timeSelect-right-item">
+            <div class="timeSelect-item time-item" :class="{'active4':testIndex == index}"><i
+              class="icongou iconfont icon-gou" v-if="testIndex == index"></i>{{item}}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="tabTitle">
+      <div v-for="(item,index) in tabs" class="tabTitle-item" :class="{'active5':TabIndex == index}"
+           @click="tabChange(index)">{{item}}
+        <span class="red-icon" v-if="TabIndex == index"></span>
+      </div>
+    </div>
+    <div class="tabContent">
+      <div class="bigMoudle bigMoudle1">
+        <div class="moudle moudle11">
+          <div class="moudleTitle">声量走势</div>
+          <div class="moudleContent">
+            <div id="chart11" v-show="!chart11Img" style="height:274px;width:100vw;"></div>
+            <div class="chart11Img"  v-show="chart11Img">
+                <ongLoading ></ongLoading>
+            </div>
+          </div>
+
+        </div>
+        <div class="moudle moudle12">
+          <div class="moudleTitle">媒体类型覆盖</div>
+          <div class="moudleContent">
+            <div id="chart12" v-show="!chart12Img && !chart12Data" style="height:210px;width:100vw;"></div>
+            <div class="chart12Img" v-show="chart12Img">
+                <ongLoading ></ongLoading>
+            </div>
+
+            <div class="chart12Img" v-show="chart12Data">
+                <notData></notData>
+            </div>
+          </div>
+
+        </div>
+        <div class="moudle moudle13">
+          <div class="moudleTitle">媒体来源排行榜</div>
+          <div class="moudleContent">
+            <div id="chart13"  v-show="!chart13Img && !chart13Data" style="height:210px;width:100vw;"></div>
+            <div class="chart13Img"  v-show="chart13Img" style="height:210px;width:100vw;">
+                <ongLoading ></ongLoading>
+            </div>
+
+            <div class="chart13Img"  v-show="chart13Data" style="height:210px;width:100vw;">
+                 <notData></notData>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+      <div class="bigMoudle bigMoudle2">
+        <div class="moudle moudle21">
+          <div class="moudleTitle">情感走势</div>
+          <div class="moudleContent">
+            <div id="chart21" v-show="!chart21Img" style="height:274px;width:100vw;"></div>
+             <div class="chart21Img"  v-show="chart21Img" style="height:274px;width:100vw;">
+                <ongLoading ></ongLoading>
+            </div>
+
+          </div>
+
+        </div>
+        <div class="moudle moudle22">
+          <div class="moudleTitle">情感分析</div>
+          <div class="moudleContent">
+            <div id="chart22" v-show="!chart22Img" style="height:210px;width:100vw;"></div>
+            <div class="chart22Img"  v-show="chart22Img">
+                <ongLoading ></ongLoading>
+            </div>
+          </div>
+
+        </div>
+        <div class="moudle moudle23">
+          <div class="moudleTitle">负面信息来源媒体</div>
+          <div class="moudleContent">
+            <div id="chart23" v-show="!chart23Img && !chart23Data" style="height:210px;width:100vw;"></div>
+            <div class="chart23Img"  v-show="chart23Img">
+                <ongLoading ></ongLoading>
+            </div>
+
+             <div class="chart23Img"  v-show="chart23Data">
+                <notData ></notData>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="bigMoudle bigMoudle3">
+        <div class="moudle moudle31">
+          <div class="moudleContent">
+            <div id="chart31" v-show="!chart31Img" style="height:300px;width:100vw;"></div>
+            <div class="chart31Img"  v-show="chart31Img">
+                <ongLoading ></ongLoading>
+            </div>
+          </div>
+        </div>
+        <div class="moudle moudle32">
+          <div class="moudleContent">
+            <div class="informationtip">
+              <dl>
+                <dt><span class="fl informationtip1">排名</span><span class="fl informationtip2">省份</span><span
+                  class="fl informationtip3">信息数</span></dt>
+                <dd v-for="(item,index) in areaRankings">
+                  <span class="fl informationtip1">{{index+1}}</span><span
+                  class="fl informationtip2">{{item.name}}</span><span class="fl informationtip3">{{item.value}}</span>
+                </dd>
+              </dl>
+              <div class="beizhu">(注：显示排名前十的省份)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <mt-popup class="sharePopup" v-model="popupShareVisible" position="bottom" popup-transition="popup-fade">
+      <v-share :option="option" v-on:closePanel="recieveMessage" v-on:upLoadImg="upLoadImg"></v-share>
+    </mt-popup>
+    <v-footerTab></v-footerTab>
+  </div>
+</template>
+<script>
+  import Vue from 'vue'
+  import { mapState } from 'vuex'
+  import footerTab from 'components/footerTab/footerTab'
+  import share from 'components/share/index'
+  import echarts from 'echarts/lib/echarts.js';
+  import 'echarts/lib/chart/bar';
+  import 'echarts/lib/chart/pie';
+  import 'echarts/lib/chart/line';
+  import 'echarts/lib/chart/map';
+  import '../../../node_modules/echarts/map/js/china';
+  import axios from 'axios';
+  import qs from 'qs';
+  import ongLoading from 'components/pageTips/ongLoading/ongLoading';
+  import notData from 'components/pageTips/notData/notData';
+  import {isAppClient} from 'common/js/common'
+  export default {
+    data(){
+      return {
+        isAppClient:!!isAppClient,
+        popupShareVisible: false,//分享初始不显示弹出框
+        option:{},//分享用到的参数
+        isActive1: false,
+        isActive2: false,
+        seen: false,
+        seen2: false,
+        seen3: false,
+        isicon:true,
+        themeList:"",
+        chart11obj:null,
+        chart12obj:null,
+        chart13obj:null,
+        chart21obj:null,
+        chart22obj:null,
+        chart23obj:null,
+        chart31obj:null,
+        newZindex:false,
+        ismengcengshow:false,
+        ismengcengshow2:false,
+        times: ["24小时", "一周", "一个月"],
+        selectTime: "24小时",
+        timeType:'day',
+        tabs: ["媒体分析", "情感分析", "地域分布"],
+        areaRankings: [],
+        testIndex: 0,
+        TabIndex: 0,
+        BigthemeName: "",
+        themeId:"",
+        chart11Img: true,
+        chart12Img: true,
+        chart13Img: true,
+        chart21Img: true,
+        chart22Img: true,
+        chart23Img: true,
+        chart31Img: true,
+        chart11Options: null,
+        chart12Options: null,
+        chart13Options: null,
+        chart21Options: null,
+        chart22Options: null,
+        chart23Options: null,
+        chart31Options: null,
+
+        chart11Data: false,
+        chart12Data: false,
+        chart13Data: false,
+        chart21Data: false,
+        chart22Data: false,
+        chart23Data: false,
+        chart31Data: false
+
+      }
+    },
+    activated(){
+//      console.log('缓存的组件又出现了，我是不是要重新拉取数据呢？')
+      if(!!this.$store.state.user.reflash[1]){
+        this.initPage();
+      }
+    },
+    watch:{
+      timeType:function(){
+        this.fncharts11();
+        this.fncharts12();
+        this.fncharts13();
+        this.fncharts21();
+        this.fncharts22();
+        this.fncharts23();
+        this.fncharts31();
+      },
+      themeId:function(){
+        this.fncharts11();
+        this.fncharts12();
+        this.fncharts13();
+        this.fncharts21();
+        this.fncharts22();
+        this.fncharts23();
+        this.fncharts31();
+      }
+    },
+    methods: {
+      openMenu:function(){
+        if(this.themeList.length > 1)
+        {
+          this.seen=!this.seen;
+          this.ismengcengshow=!this.ismengcengshow;
+          this.isicon=!this.isicon;
+          this.ismengcengshow2=false;
+          this.seen2=false;
+          this.newZindex=false
+        }
+      },
+      time: function () {
+        this.isActive1 = !this.isActive1;
+        this.isActive2 = false;
+        this.seen=false;
+        this.ismengcengshow=false;
+        this.newZindex=!this.newZindex
+        this.ismengcengshow2=!this.ismengcengshow2;
+        this.seen2 = !this.seen2;
+      },
+      fnMengcengshow:function(){
+        this.ismengcengshow=false;
+        this.seen=false;
+        this.isicon=true;
+      },
+      fnMengcengshow2:function(){
+        this.ismengcengshow2=false;
+        this.newZindex=false;
+        this.seen2 = false;
+      },
+      stime: function (index, item) {
+        this.testIndex = index;
+        this.selectTime = item;
+        this.newZindex=false;
+        this.ismengcengshow2=false;
+
+        if(item=="24小时"){
+          this.timeType="day";
+        };
+        if(item=="一周"){
+          this.timeType="week";
+        };
+        if(item=="一个月"){
+          this.timeType="month";
+        };
+        var index = this.TabIndex;
+        this.seen2 = false;
+
+      },
+      tabChange: function (index) {
+        this.TabIndex = index;
+        if(index==0){
+          document.querySelector(".bigMoudle1").style.zIndex=100;
+          document.querySelector(".bigMoudle2").style.zIndex=10;
+          document.querySelector(".bigMoudle3").style.zIndex=10;
+          document.querySelector(".tabContent").style.height='1030px';
+
+        };
+        if(index==1){
+          document.querySelector(".bigMoudle1").style.zIndex=10;
+          document.querySelector(".bigMoudle2").style.zIndex=100;
+          document.querySelector(".bigMoudle3").style.zIndex=10;
+          document.querySelector(".tabContent").style.height='1030px';
+        };
+        if(index==2){
+          document.querySelector(".bigMoudle1").style.zIndex=10;
+          document.querySelector(".bigMoudle2").style.zIndex=10;
+          document.querySelector(".bigMoudle3").style.zIndex=100;
+          document.querySelector(".tabContent").style.height='1120px';
+        };
+      },
+      changeBigTitle: function (item) {
+        this.ismengcengshow=false;
+        this.BigthemeName=item.themeName;
+        this.themeId=item.themeId;
+        this.option.themeId=this.themeId;
+        this.seen = false;
+        this.isicon=true;
+        var selectTime = this.selectTime;
+        var index = this.TabIndex;
+       // this.fncharts11();
+/*
+         this.fncharts11();
+        this.fncharts12();
+        this.fncharts13();
+        this.fncharts21();
+        this.fncharts22();
+        this.fncharts23();
+        this.fncharts31();*/
+
+      },
+      share: function () {
+        //if(!!isAppClient){
+        this.popupShareVisible = true;
+        setTimeout(function(){
+          document.querySelector(".v-modal").style.zIndex=99999999;
+        },10)
+//        }else {
+//          //发起如下格式的伪url:share://title=分享标题&content=分享内容&img=http://123.png&url=http://test.com
+//          window.location.href="share://title=分享标题&content=分享内容&img=http://123.png&url=http://test.com"
+//        }
+      },
+      upLoadImg:function(falg,callback){
+        var allImgUrl=
+          this.chart11obj.getDataURL().replace("data:image/png;base64,","")
+          +"@fengefu@"+this.chart12obj.getDataURL().replace("data:image/png;base64,","")
+          +"@fengefu@"+this.chart13obj.getDataURL().replace("data:image/png;base64,","")
+          +"@fengefu@"+this.chart21obj.getDataURL().replace("data:image/png;base64,","")
+          +"@fengefu@"+this.chart22obj.getDataURL().replace("data:image/png;base64,","")
+          +"@fengefu@"+this.chart23obj.getDataURL().replace("data:image/png;base64,","")
+          +"@fengefu@"+this.chart31obj.getDataURL().replace("data:image/png;base64,","");
+        var _this=this;
+        axios.post('/loadapp/down', qs.stringify({
+          'filePath':allImgUrl,
+          'themeId':this.themeId,
+          'timeType':this.timeType
+        })).then(function (res) {
+          res.data.themeId=_this.themeId;
+          callback(res.data,falg)
+        }).catch(function(error) {
+          console.log(error);
+        });
+
+      },
+      recieveMessage: function(txt) {
+        if (txt === 'close') {
+          this.popupShareVisible = false;
+        }
+      },
+      initPage:function(){
+        this.$store.commit('reflashClear','1');
+        var userId=this.user.userId;
+        var _this=this;
+        axios.post('/themeapp/getTheme', qs.stringify({'userId':userId})).then(function (res) {
+          _this.themeList=res.data.themeList;
+          _this.BigthemeName=_this.themeList[0].themeName;
+          _this.themeId=_this.themeList[0].themeId;
+          _this.option.themeId=_this.themeId;
+          _this.fncharts11();
+          _this.fncharts12();
+          _this.fncharts13();
+          _this.fncharts21();
+          _this.fncharts22();
+          _this.fncharts23();
+          _this.fncharts31();
+        }).catch(function(error) {
+          console.log(error);
+        });
+      },
+      fncharts11: function (id) {
+
+        var userId = this.user.userId;
+        var themeId = this.themeId;
+        var timeType = this.timeType;
+        var _this=this;
+         _this.chart11Img = true;
+//         console.log("hahaha:"+ themeId)
+        axios.post('/themeapp/analysis', qs.stringify({
+          'userId': userId,
+          'themeId': themeId,
+          'timeType':timeType,
+          'chartType':'mediaTypeLine'
+        })).then(function (res) {
+//          console.log(res);
+          var data=res.data;
+          if (data) {
+            var options = {
+              calculable: true,
+              tooltip: {
+                trigger: 'axis',
+                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                  type: 'line'        // 默认为直线，可选为：'line' | 'shadow'
+                }
+
+
+              },
+              legend: {
+                data: ['全部', '新闻', '微信', '微博','论坛','博客','贴吧'],
+                textStyle: {
+                  color: '#c8c8c8'
+                },
+                icon: 'circle'
+              },
+              grid: {
+                left: '56',
+                top: '65',
+                right: '26'
+              },
+              xAxis: {
+                type: 'category',
+                boundaryGap: false,//折线距离y轴有无距离
+                axisLabel: {
+                  textStyle: {
+                    fontSize: 12,
+                    color: "#8e9091",
+                    fontFamily: "微软雅黑"
+                  },
+                  margin: 10
+                },
+                axisTick: {
+                  show: false
+                },
+
+                axisLine: {
+                  lineStyle: {
+                    color: "#6986c9",
+                    type: "solid",
+                    opacity: 1
+                  }
+                },
+                data: data.time,
+
+              },
+              yAxis: {
+                type: 'value',
+                axisLabel: {
+                  margin: 10,
+                  textStyle: {
+                    fontSize: 14,
+                    color: "#8e9091",
+                    fontFamily: "微软雅黑"
+                  },
+                  formatter: function (value) {
+                    var newValue = value / 1000 + "k";
+                    return newValue
+                  },
+                },
+                axisTick: {
+                  show: false
+                },
+                axisLine: {
+                  lineStyle: {
+                    color: "#6986c9",
+                    type: "solid",
+                    opacity: 0
+                  }
+                },
+                splitLine: {
+                  lineStyle: {
+                    color: '#ebeef3', //分割线颜色
+                    type: "solid",
+                    opacity: 1
+                  }
+                }
+              },
+              series: [
+                {
+                  name: '全部',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data: data.all,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#5eb4e4'
+                    }
+                  },
+                },
+                {
+                  name: '新闻',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data: data.news,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#9d6ab9'
+                    }
+                  },
+                },
+                {
+                  name: '微信',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data: data.wechat,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#919fdc'
+                    }
+                  },
+                },
+                {
+                  name: '微博',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data:data.weibo,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#cc374e'
+                    }
+                  },
+                },
+                {
+                  name: '论坛',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data:data.forum,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#f25755'
+                    }
+                  },
+                },
+                {
+                  name: '博客',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data:data.blog,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#f5ab54'
+                    }
+                  },
+                },
+                {
+                  name: '贴吧',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data:data.tbar,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#57dad8'
+                    }
+                  },
+                },
+
+              ]
+            };
+//            console.log("data.blog: "+ data.blog)
+             _this.chart11Img = false;
+//             console.log("走到这里了图1为："+_this.chart11Img)
+            _this.chart11Options = options;
+            _this.chart11obj = echarts.init(document.getElementById("chart11"));
+
+            _this.chart11obj.setOption(options);
+//            console.log("试试走到这里了吗")
+
+          } else {
+//            console.log("无DATA")
+            _this.chart11Options = null;
+            _this.chart11Img = false;
+          };
+
+
+        }).catch(function(error) {
+          console.log(error);
+        });;
+       // _this.chart11Img = false;
+//        console.log("this.chart11Img: "+this.chart11Img)
+      }
+      ,
+      fncharts12: function (id) {
+        var userId = this.user.userId;
+        var themeId = this.themeId;
+        var timeType = this.timeType;
+        var _this=this;
+        _this.chart12Img = true;
+        _this.chart12Data = false;
+        axios.post('/themeapp/analysis', qs.stringify({
+          'userId': userId,
+          'themeId': themeId,
+          'timeType':timeType,
+          'chartType':'mediaTypePercent'
+        })).then(function (res) {
+          var data=res.data;
+
+          if(data.flg === "1"){
+            _this.chart12Img =false;
+            _this.chart12Data = true;
+            return
+          }
+
+
+          if (data) {
+            var dataArr=[];
+            var colors=['#536c86','#55cfdb','#f95269','#aba6a4','#57dad8','#f5ab54' ];
+            data.points.forEach(function(item,index){
+              var dataObj= {
+                value: item.value,
+                name: item.name,
+                icon: 'circle',
+                itemStyle: {    //数据填充
+                  normal: {
+                    color: colors[index],          //颜色填充
+                  }
+                },
+              };
+              dataArr.push(dataObj);
+            });
+            var options = {
+
+              tooltip: {
+                show: true,
+                formatter: "{b}\n{c}",
+              },
+              calculable: true,
+              series: [
+                {
+                  name: '',
+                  type: 'pie',
+                  center: ['50%', '50%'],
+                  radius: [60, 61],
+                  labelLine: {
+                    normal: {
+                      show: false
+
+                    },
+
+                  },
+                  data: [{
+                    value: 223,
+                    itemStyle: {
+                      normal: {
+                        color: '#cccccc', //颜色填充
+                        opacity: 0.5
+                      }
+                    },
+                    tooltip: {show: false}
+                  }]
+                },
+
+                {
+                  name: '',
+                  type: 'pie',
+                  center: ['50%', '50%'],
+                  radius: [30, 50],
+
+                  labelLine: {
+                    normal: {
+                      length: 6,
+                      length2: 30
+                    }
+                  },
+                  label: {
+                    normal: {
+                      position: 'outside',
+                      show: true,
+                      formatter: "{b}\n{d}%",
+                      textStyle: {
+                        fontSize: 12
+                      }
+                    }
+                  },
+                  data: dataArr
+                },
+
+              ]
+
+            };
+            _this.chart12Img = false;
+//             console.log("走到这里了图2为："+_this.chart12Img)
+            _this.chart12Options = options;
+            _this.chart12obj = echarts.init(document.getElementById("chart12"));
+            _this.chart12obj.setOption(options);
+
+          } else {
+            _this.chart12Options = null;
+            _this.chart12Img = false;
+          }
+          ;
+
+
+        }).catch(function(error) {
+          console.log(error);
+        });;
+
+      }
+      ,
+      fncharts13: function (id) {
+
+
+        var userId = this.user.userId;
+        var themeId = this.themeId;
+        var timeType = this.timeType;
+        var _this=this;
+        _this.chart13Img = true;
+        _this.chart13Data = false;
+        axios.post('/themeapp/analysis', qs.stringify({
+          'userId': userId,
+          'themeId': themeId,
+          'timeType':timeType,
+          'chartType':'mediaTop'
+        })).then(function (res) {
+          var data=res.data;
+          var colors=['#f96c6a','#f85269','#617992','#55d0dc','#b482ce','#65bff0','#f5bb76','#ada9a8','#5eb4e4','#536c86'];
+
+          if(data.flg === "1"){
+            _this.chart13Img =false;
+            _this.chart13Data = true;
+            return
+          }
+
+          if (data) {
+            var dataArr=[];
+            data.mediaPercent.forEach(function(item,index){
+              var dataObj={
+                name: item.name,
+                value: item.value,
+                itemStyle: {
+                  normal: {
+                    color: colors[index]
+                  }
+                },
+                label: {
+                  normal: {
+                    show: true,
+                    position: 'top',
+                    textStyle: {
+                      fontSize: 12,
+                    }
+                  }
+                }
+
+              };
+              dataArr.push(dataObj);
+            });
+            var options = {
+              title: {
+                text: '',
+                textStyle: {
+                  fontSize: 12
+                }
+              },
+              tooltip: {
+                show: true,
+                formatter: "{b}\n{c}",
+                trigger: 'axis'
+              },
+              calculable: true,
+              legend: {
+                top: 10,
+                show: false,
+                textStyle: {
+                  color: "#333"
+                }
+              },
+              xAxis: [{
+                type: 'category',
+                data: data.mediaName,
+                axisLine: {
+                  lineStyle: {
+                    color: "#e2e2e2",
+                    width: 1
+                  }
+                },
+                axisTick: {
+                  show: false
+                },
+                axisLabel: {
+                  formatter: '{value}'
+                  , textStyle: {
+                    color: '#8a8a8a',
+                    fontSize: '14px'
+                  }
+                }, splitLine: {
+                  show: false
+                }
+              }],
+              yAxis: [{
+                show: false,
+                type: 'value',
+                name: '',
+                axisLabel: {
+                  show: false,
+                  formatter: ''
+                }, axisTick: {
+                  show: false
+                },
+                axisLine: {
+                  lineStyle: {
+                    color: "#ccc",
+                    width: 1
+                  }
+                }
+              }],
+              grid: {
+                x: '10',
+                x2: '10',
+                y: '40',
+                y2: '60'
+              },
+              series: [{
+                type: 'bar',
+                barWidth: '60%',
+                barGap: '80%',
+                data: dataArr
+              }
+              ]
+            };
+            _this.chart13Img = false;
+            _this.chart13Options = options;
+            _this.chart13obj = echarts.init(document.getElementById("chart13"));
+            _this.chart13obj.setOption(options);
+
+          } else {
+            _this.chart13Options = null;
+            _this.chart13Img = false;
+          }
+          ;
+
+
+        }).catch(function(error) {
+          console.log(error);
+        });;
+
+      }
+      ,
+      fncharts21: function (id) {
+
+        var userId = this.user.userId;
+        var themeId = this.themeId;
+        var timeType = this.timeType;
+        var _this=this;
+        _this.chart21Img = true;
+        axios.post('/themeapp/analysis', qs.stringify({
+          'userId': userId,
+          'themeId': themeId,
+          'timeType':timeType,
+          'chartType':'sentimentTimeLine'
+        })).then(function (res) {
+          var data=res.data;
+          if (data) {
+            var options = {
+
+              tooltip: {
+                trigger: 'axis',
+                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                  type: 'line'        // 默认为直线，可选为：'line' | 'shadow'
+                }
+              },
+              grid: {
+                left: 10,
+                right: 20,
+                bottom: 10,
+                top: 50,
+                containLabel: true
+              },
+              legend: {
+                data: ['正面', '中性', '负面'],
+                right:0,
+                textStyle: {
+                  color: '#a9a9a9'
+                },
+                icon: 'circle'
+              },
+              xAxis: {
+                type: 'category',
+                boundaryGap: false,
+
+                axisTick: {
+                  show: false
+                },
+                axisLine: {
+                  show:false,
+                  lineStyle: {
+                    color: '#01c2db'
+                  }
+                },
+                splitLine: {
+                  show: false
+                },
+                axisLabel: {
+                  textStyle: {
+                    color: "#75849c"
+                  }
+                },
+                data: data.time
+
+              },
+              yAxis: {
+                name: '',
+
+                smooth: true,
+                axisTick: {
+                  show: false
+                },
+                splitLine: {
+                  lineStyle: {
+                    color: '#ebeef3', //分割线颜色
+                    type: "solid",
+                    opacity: 1
+                  }
+                },
+                axisLine: {
+                  show:false,
+                  lineStyle: {
+                    color: '#01c2db'
+                  }
+                },
+
+              },
+
+              series: [
+                {
+                  name: '正面',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data: data.zheng,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#5eb4e4'
+                    }
+                  },
+                },
+               {
+                  name: '中性',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data: data.zhong,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#9d6ab9'
+                    }
+                  },
+                },
+                {
+                  name: '负面',
+                  type: 'line',
+                  smooth: false,
+                  itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                  data: data.fu,
+                  symbolSize: 4,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#cc374e'
+                    }
+                  },
+                },
+              ]
+            };
+            _this.chart21Img = false;
+            _this.chart21Options = options;
+            _this.chart21obj = echarts.init(document.getElementById("chart21"));
+            _this.chart21obj.setOption(options);
+
+
+          } else {
+            _this.chart21Options = null;
+            _this.chart21Img = false;
+          }
+          ;
+
+
+        }).catch(function(error) {
+          console.log(error);
+        });;
+
+      }
+      ,
+      fncharts22: function (id) {
+
+        var userId = this.user.userId;
+        var themeId = this.themeId;
+        var timeType = this.timeType;
+        var _this=this;
+         _this.chart22Img = true;
+        axios.post('/themeapp/analysis', qs.stringify({
+          'userId': userId,
+          'themeId': themeId,
+          'timeType':timeType,
+          'chartType':'sentimentPercent'
+        })).then(function (res) {
+          var data=res.data;
+          if (data) {
+            var dataArr=[];
+            var colors=['#f95269','#5ab2e5','#75d3a2'];
+            data.sentimentPercent.forEach(function(item,index){
+              var dataObj= {
+                value: item.value,
+                name: item.name,
+                icon: 'circle',
+                itemStyle: {    //数据填充
+                  normal: {
+                    color: colors[index],          //颜色填充
+                  }
+                },
+              };
+              dataArr.push(dataObj);
+            });
+            var options = {
+
+              tooltip: {
+                show: true,
+                formatter: "{b}\n{c}",
+              },
+              calculable: true,
+              series: [
+                {
+                  name: '',
+                  type: 'pie',
+                  center: ['50%', '50%'],
+                  radius: [60, 61],
+                  labelLine: {
+                    normal: {
+                      show: false
+
+                    },
+
+                  },
+                  data: [{
+                    value: 223,
+                    itemStyle: {
+                      normal: {
+                        color: '#cccccc', //颜色填充
+                        opacity: 0.5
+                      }
+                    },
+                    tooltip: {show: false}
+                  }]
+                },
+
+                {
+                  name: '',
+                  type: 'pie',
+                  center: ['50%', '50%'],
+                  radius: [30, 50],
+
+                  labelLine: {
+                    normal: {
+                      length: 6,
+                      length2: 30
+                    }
+                  },
+                  label: {
+                    normal: {
+                      position: 'outside',
+                      show: true,
+                      formatter: "{b}\n{d}%",
+                      textStyle: {
+                        fontSize: 12
+                      }
+                    }
+                  },
+                  data: dataArr
+                },
+
+              ]
+
+            };
+            _this.chart22Img = false;
+            _this.chart22Options = options;
+            _this.chart22obj = echarts.init(document.getElementById("chart22"));
+            _this.chart22obj.setOption(options);
+
+          } else {
+            _this.chart22Options = null;
+            _this.chart22Img = false;
+          }
+          ;
+
+
+        }).catch(function(error) {
+          console.log(error);
+        });;
+
+      }
+      ,
+      fncharts23: function (id) {
+
+        var userId = this.user.userId;
+        var themeId = this.themeId;
+        var timeType = this.timeType;
+        var _this=this;
+          _this.chart23Img = true;
+          _this.chart23Data = false;
+        axios.post('/themeapp/analysis', qs.stringify({
+          'userId': userId,
+          'themeId': themeId,
+          'timeType':timeType,
+          'chartType':'mediaTopFu'
+        })).then(function (res) {
+          var data=res.data;
+         if(data.flg === "1"){
+            _this.chart23Img =false;
+            _this.chart23Data = true;
+            return
+          }
+
+
+          if (data) {
+//            console.log(data);
+            var dataArr=[];
+            var colors=['#f96c6a','#f85269','#617992','#55d0dc','#b482ce','#65bff0','#f5bb76','#ada9a8','#5eb4e4','#536c86','#3d8e64','#ce2928'];
+            data.mediaPercent.forEach(function(item,index){
+              var dataObj= {
+                value: item.value,
+                name: item.name,
+                icon: 'circle',
+                itemStyle: {    //数据填充
+                  normal: {
+                    color: colors[index],          //颜色填充
+                  }
+                },
+              };
+              dataArr.push(dataObj);
+            });
+            var options = {
+              tooltip: {
+                trigger: 'item',
+                formatter: "{b} :{c}"
+              },
+              series: [
+                {
+                  name: '',
+                  type: 'pie',
+                  radius: ['20%', '60%'],
+                  roseType: 'area',
+                  itemStyle: {
+                    normal: {
+                      color: function (params) {
+                        var colorList = ['#81f594', '#58c16b', '#0787e8', '#00ac1d', '#ffc600', '#ff4800'];
+                        return colorList[params.dataIndex]
+                      }
+                    }
+                  },
+                  label: {
+                    normal: {
+                      formatter: '{b} \n {d}%',
+                      textStyle: {fontSize: 12}
+                    }
+                  },
+                  data: dataArr
+
+                }
+              ]
+            };
+            _this.chart23Img = false;
+            _this.chart23Options = options;
+            _this.chart23obj = echarts.init(document.getElementById("chart23"));
+            _this.chart23obj.setOption(options);
+
+          } else {
+            _this.chart23Options = null;
+            _this.chart23Img = false;
+          }
+          ;
+
+
+        }).catch(function(error) {
+          console.log(error);
+        });;
+
+      }
+      ,
+      fncharts31: function (id) {
+
+        var userId = this.user.userId;
+        var themeId = this.themeId;
+        var timeType = this.timeType;
+        var _this=this;
+         _this.chart31Img = true;
+        axios.post('/themeapp/analysis', qs.stringify({
+          'userId': userId,
+          'themeId': themeId,
+          'timeType':timeType,
+          'chartType':'area'
+        })).then(function (res) {
+          var data=res.data;
+          if (data) {
+            _this.areaRankings=data.areaValue.slice(0,10);
+            var options = {
+              tooltip: {
+                show:true,
+                trigger: 'item',
+                backgroundColor: 'rgba(255,255,255,0.7)',
+                borderColor: '#ff3333',
+                textStyle: {
+                  color: '#333',
+                  fontSize: 15
+                },
+                borderWidth: 1,
+                formatter: "<a style='color:#ff0000;font-weight:600; font-size:16px;'>{b}</a> <br> 信息数<a style='color:#ff5a00;font-weight:600; font-size:16px;'>{c}</a>",
+                padding: 10,
+              },
+              visualMap: {
+                type: 'piecewise',
+                itemWidth: 10,
+                itemHeight: 12,
+                splitNumber: 4,
+                min: 0,
+                max: data.areaValue[0].value,
+                left: '30',
+                top: 'bottom',
+                text: ['高', '低'],           // 文本，默认为数值文本
+                calculable: true,
+                color: ['#2381d2','#c6edfb'],
+              },
+              series: [
+                {
+                  name: '',
+                  type: 'map',
+                  mapType: 'china',
+                  roam: false,
+                  label: {
+                    normal: {
+                      show: false
+                    },
+                    emphasis: {
+                      show: false
+                    }
+                  },
+                  data:data.areaValue
+                }
+              ]
+            };
+            _this.chart31Img = false;
+            _this.chart31Options = options;
+            _this.chart31obj = echarts.init(document.getElementById("chart31"));
+            _this.chart31obj.setOption(options);
+
+          } else {
+            _this.chart31Options = null;
+            _this.chart31Img = false;
+          }
+          ;
+
+
+        }).catch(function(error) {
+          console.log(error);
+        });;
+
+      }
+    }
+
+    ,
+    mounted() {
+      this.initPage();
+    },
+    components: {
+      'v-footerTab': footerTab,
+      ongLoading,
+      notData,
+      'v-share': share,
+    },
+    computed: mapState({ user: state => state.user }),
+  }
+
+
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+  /* swipe */
+  .icongou {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    color: red;
+  }
+  .newZindex{
+    z-index:10001001 ;
+  }
+  .title {
+    height: 45px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10001001;
+    background: #1c2532;
+    font-size: 16px;
+  }
+
+  .chartimg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top:0;
+    bottom: 0;
+    margin:auto;
+  }
+  .chartimg1 {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top:0;
+    bottom: 0;
+    margin: auto;
+  }
+  .title h2 {
+    /*width: 108px;*/
+    height: 44px;
+    line-height: 44px;
+    color: #dbdbdb;
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .title .time {
+    display: block;
+    width: 35px;
+    font-size: 24px;
+    line-height: 40px;
+    position: absolute;
+    color: #ffffff;
+    right: 45px;
+    top: 5px;
+  }
+
+  .bigTitle i {
+    color: #ffffff;
+    font-size: 14px;
+  }
+  .bigTitle i.icon-caret{
+    font-size: 16px;
+  }
+  .title .share {
+    display: block;
+    width: 25px;
+    height: 27px;
+    position: absolute;
+    right: 17px;
+    top: 8px;
+    color: #ffffff;
+    font-size: 24px;
+    line-height: 27px;
+  }
+
+  .bigTitle-item {
+    width: 100%;
+    position: fixed;
+    left: 0;
+    background: #FFF;
+    z-index: 10001001;
+  }
+
+  .bigTitle-item li {
+    width: 100%;
+    line-height: 44px;
+    height: 44px;
+    text-align: center;
+    color: #656565;
+    font-size: 14px;
+
+  }
+
+  .mengceng1 {
+    background: #000000;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 45px;
+    left: 0;
+    opacity: 0.2;
+    z-index: 10001000;
+  }
+
+  .active {
+    color: #ffffff;
+  }
+
+  .red-icon {
+    display: block;
+    height: 2px;
+    width: 80%;
+    margin: 0 auto;
+    background: #ff3333;
+  }
+
+  .tabTitle {
+    width: 100%;
+    height: 45px;
+    line-height: 45px;
+    position: fixed;
+    left: 0;
+    top: 43px;
+    z-index: 100;
+    background: #fafafa;
+  }
+
+  .tabTitle-item {
+    text-align: center;
+    float: left;
+    width: 33%;
+    color: #8a8a8a;
+    font-size: 14px;
+  }
+  .timeSelect-right-dom{
+    padding-left: 28px;
+  }
+  .timeSelect {
+    width: 100%;
+    height: 115px;
+    position: fixed;
+    background: white;
+    padding-top:15px;
+    left: 0;
+    top: 43px;
+    border-top: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+  }
+
+  .timeSelect-left {
+    height: 43px;
+    line-height: 43px;
+    padding-left: 28px;
+  }
+
+  .timeSelect-right {
+    height: 43px;
+    width: 33%;
+    float: left;
+  }
+
+
+  .time-item {
+    background: #f2f2f2;
+    border: 1px solid #f2f2f2;
+    border-radius: 5px;
+    width: 80%;
+    height:32px;
+    line-height: 32px;
+    text-align: center;
+
+  }
+
+  .time-item i {
+    margin-right: 3px;
+  }
+
+  .active4 {
+    border: 1px solid red;
+  }
+
+  .tabContent {
+    overflow: hidden;
+    height: 1030px;
+    position: relative;
+    background: #FFF;
+  }
+  .bigMoudle{
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 90px;
+    padding-bottom: 60px;
+    background: #f4f4f4;
+    /*overflow: hidden;*/
+  }
+  .bigMoudle1{
+    z-index: 100;
+  }
+  .bigMoudle2{
+    z-index: 10;
+  }
+  .bigMoudle3{
+    z-index: 10;
+  }
+
+  .active5 {
+    color: red;
+  }
+
+  .moudle {
+    margin-top: 10px;
+  }
+
+  .moudleTitle {
+    height: 42px;
+    background: #f4f4f4;
+    text-indent: 10px;
+    line-height: 42px;
+    color: #000000;
+  }
+
+  .moudleContent {
+    background: #FFF;
+  }
+  .dataTipsWarp{
+    position: absolute!important;
+  }
+  #chart11 {
+    height: 274px;
+    position: relative;
+  }
+  .chart11Img{
+    height: 274px;
+    position: relative;
+  }
+
+  #chart12 {
+    height: 210px;
+    position: relative;
+  }
+
+   .chart12Img{
+    height: 210px;
+    position: relative;
+  }
+
+  #chart13 {
+    height: 210px;
+    position: relative;
+  }
+
+  .chart13Img {
+    height: 210px;
+    position: relative;
+  }
+
+  #chart21 {
+    height: 274px;
+    position: relative;
+  }
+
+  .chart21Img {
+    height: 274px;
+    position: relative;
+  }
+
+  #chart22 {
+    height: 210px;
+    position: relative;
+  }
+
+  .chart22Img {
+    height: 210px;
+    position: relative;
+  }
+
+  #chart23 {
+    height: 210px;
+    position: relative;
+  }
+
+  .chart23Img {
+    height: 210px;
+    position: relative;
+  }
+
+  #chart31 {
+    height: 300px;
+    position: relative;
+  }
+
+  .chart31Img {
+    height: 300px;
+    position: relative;
+  }
+
+  .moudle31 {
+    margin-top: 28px;
+  }
+
+  .moudle23, .moudle13 {
+    margin-bottom: 18px;
+  }
+
+  .moudle32 {
+    margin-top: 24px;
+    margin-bottom: 20px;
+  }
+
+  .moudle32 .moudleContent {
+    padding-bottom: 14px;
+  }
+
+  .informationtip {
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  .informationtip dt {
+    height: 42px;
+    line-height: 42px;
+    color: #8a8a8a;
+    font-size: 14px;
+    position: relative;
+    padding-left: 22px;
+  }
+
+  .informationtip dd {
+    height: 42px;
+    line-height: 42px;
+    color: #aaa5a2;
+    padding-left: 22px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    position: relative;
+    background: #f9f9f9;
+  }
+
+  .informationtip dd .informationtip3 {
+    color: #aaa5a2;
+  }
+  .informationtip dd .informationtip2 {
+    color: #000000;
+  }
+  .informationtip dd .informationtip1 {
+    color: #aaa5a2;
+  }
+
+  .informationtip dd:nth-of-type(1) {
+    background: #e5f5fe;
+  }
+
+  .informationtip dt .informationtip1 {
+    border: 1px solid #FFF;
+  }
+
+  .informationtip dd:nth-of-type(1) .informationtip1 {
+    background: #55cbe0;
+    border: 1px solid #55cbe0;
+    color: #FFF;
+  }
+
+  .informationtip dd:nth-of-type(1) .informationtip3 {
+    color: #00ddfe;
+  }
+
+  .informationtip dd:nth-of-type(2) {
+    background: #e5f5fe;
+
+  }
+
+  .informationtip dd:nth-of-type(2) .informationtip1 {
+    background: #55cbe0;
+    border: 1px solid #55cbe0;
+    color: #FFF;
+  }
+
+  .informationtip dd:nth-of-type(2) .informationtip3 {
+    color: #00ddfe;
+  }
+
+  .informationtip dd:nth-of-type(3) {
+    background: #e5f5fe;
+
+  }
+
+  .informationtip dd:nth-of-type(3) .informationtip1 {
+    background: #55cbe0;
+    border: 1px solid #55cbe0;
+    color: #FFF;
+  }
+
+  .informationtip dd:nth-of-type(3) .informationtip3 {
+    color: #00ddfe;
+  }
+
+  .informationtip1, .informationtip2, .informationtip3 {
+    display: block;
+    text-align: center;
+  }
+
+  .informationtip .informationtip1 {
+    position: absolute;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #a39e9c;
+  }
+
+  .informationtip2 {
+    width: 70%;
+  }
+
+  .informationtip3 {
+    width: 30%;
+  }
+
+  .fl {
+    float: left;
+  }
+
+  .beizhu {
+    font-size: 12px;
+    text-align: right;
+    color: #8a8a8a;
+  }
+
+  .footerTab {
+    z-index: 10000000;
+  }
+  .sharePopup{
+    z-index: 99999999999999!important;
+  }
+</style>

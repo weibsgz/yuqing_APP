@@ -1,0 +1,226 @@
+<template>
+<div>
+    <div class="filter-ct">
+        <div class="filter-input">
+            <div>搜索包含关键词</div>
+            <input type="text" name="">
+        </div>
+        <div class="filter-input">
+            <div>不包含关键词</div>
+            <input type="text" name="">
+        </div>
+        <dl class="filter-btn">
+            <dt>媒体类型</dt>
+            <dd>
+                <ul>
+                    <li v-for="(item, index) in condFilter.messageType" :class="{'active':messageIndex == index}" @click="selectItem(index,'messageType',item)">{{item.name}}</li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="filter-btn">
+            <dt>情感类型</dt>
+            <dd>
+                <ul>
+                    <li v-for="(item, index) in condFilter.emotionType" :class="{'active':emotionIndex == index}" @click="selectItem(index,'emotionType',item)">{{item.name}}</li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="filter-btn">
+            <dt>时间范围</dt>
+            <dd>
+                <ul>
+                    <li v-for="(item, index) in condFilter.timeArea" :class="{'active':timeIndex == index}" @click="selectItem(index,'timeArea',item)">{{item.name}}</li>
+                </ul>
+            </dd>
+        </dl>
+        <dl class="filter-btn">
+            <dt>排序</dt>
+            <dd>
+                <ul>
+                    <li v-for="(item, index) in condFilter.sort" :class="{'active':sortIndex == index}" @click="selectItem(index,'sort',item)">{{item.name}}</li>
+                </ul>
+            </dd>
+        </dl>
+        <div class="button-area">
+            <button @click="submit()">确定</button>
+        </div>
+    </div>
+    <v-footerTab></v-footerTab>
+<!--     <mt-popup id="mt" v-model="searchResMenu" position="right">
+        <detail v-on:fanhuiEvent="recieveMessage"></detail>
+    </mt-popup> -->
+    <mt-popup id="mt" v-model="searchResMenu" position="right">
+        <advancedSearchRes v-on:fanhuiEvent="recieveMessage" v-bind:filter="filter"></advancedSearchRes >
+    </mt-popup>
+
+</div>
+</template>
+
+<script>
+    //引入组件
+    import Vue from 'vue';
+    import {
+        Popup,
+        Loadmore
+    } from 'mint-ui';
+    import axios from 'axios';
+    import detail from 'components/detail/detail';
+    import advancedSearchRes from 'components/advancedSearchRes/advancedSearchRes';
+    import footerTab from 'components/footerTab/footerTab'
+    //创造构造器
+
+    export default{
+        name: 'advancedSearchFilter',
+        data() {
+            return {
+                messageIndex:0,
+                emotionIndex:0,
+                timeIndex:0,
+                sortIndex:0,
+                searchResMenu: false,
+                condFilter: {},
+                filter: {}
+            }
+        },
+        components: {
+            Popup,
+            detail,
+            advancedSearchRes,
+            'v-footerTab':footerTab
+        },
+        created() {
+            this.$nextTick(function() {
+                this.render();
+            })
+        },
+        methods: {
+            render: function() {
+                var _this = this;
+                axios.get('static/data/yuqingdongtai.json', {
+                        params: {
+                            page: this.page
+                        }
+                    })
+                    .then(function(res) {
+                        // console.log(res)
+                        _this.news = res.data.news;
+                        _this.keyWords = res.data.keyWords
+                        _this.condFilter = res.data.condFilter;
+                        // console.log(res.condFilter)
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    });
+
+            },
+            recieveMessage: function (txt) {
+                if (txt == 'advancedSearchRes') {
+                    this.searchResMenu = false;
+                }
+            },
+            selectItem: function (index, type, item) {
+                switch(type) {
+                    case 'messageType':
+                      this.messageIndex = index;
+                      break;
+                    case 'emotionType':
+                      this.emotionIndex = index;
+                      break;
+                    case 'timeArea':
+                      this.timeIndex = index;
+                      break;
+                    case 'sort':
+                      this.sortIndex = index;
+                      break;
+                    default:
+                }
+                this.condFilter[type].forEach(v=>{
+                    v.checked = false;
+                  })
+                this.$set(item,'checked',true);
+            },
+            submit: function () {
+                this.searchResMenu = true;
+
+                for(var key in this.condFilter){
+                  this.condFilter[key].forEach(v=>{
+                    if (v.checked) {
+                       //console.log(key+':'+v.value)
+                       this.filter[key] = v.value;
+                    }
+                  });
+              //如果某菜单没有选 this.filter[key] == undefined
+              // console.log(this.filter[key])
+                  if(typeof this.filter[key] === 'undefined'){
+                     this.filter[key] = this.condFilter[key][0].value
+                  }
+                }
+                console.log(this.filter)
+            }
+        }
+    }
+
+
+
+
+
+</script>
+
+<style scope>
+    .filter-ct {
+        padding: 15px;
+        overflow: hidden;
+    }
+    .filter-input > div, .filter-btn dt {
+        height: 40px;
+        line-height: 40px;
+        font-size: 14px;
+    }
+    .filter-input > input {
+        width: 100%;
+        border: 1px solid  #D9D9D9;
+        border-radius: .3em;
+        height: 25px;
+        line-height: 25px;
+    }
+    .filter-btn ul {
+        font-size: 0;
+        width: 110%;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .filter-btn li {
+        min-width: 20%;
+        box-sizing: border-box;
+        padding: 0 1em;
+        margin-right: 3.5%;
+        margin-bottom: 3.5%;
+        border: 1px solid #999;
+        border-radius: 5px;
+        line-height: 35px;
+        font-size: 14px;
+        text-align: center;
+        color: #333;
+    }
+    .filter-btn li.active {
+        color: red;
+        border: 1px solid red;
+        background:url(gou.png);
+        background-repeat: no-repeat;
+        background-position: 2px 12px;
+    }
+    .button-area {
+        width: 80%;
+        margin: 20px auto;
+    }
+    .button-area > button {
+        width: 100%;
+        text-align: center;
+        height: 45px;
+        line-height: 45px;
+        background-color: #ff3333;
+        color: #fff;
+        border-radius: 5px;
+        border: none;
+    }
+</style>

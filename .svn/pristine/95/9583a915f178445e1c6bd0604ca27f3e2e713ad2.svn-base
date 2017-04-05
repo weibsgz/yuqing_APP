@@ -1,0 +1,710 @@
+<template>
+    <div class="yuqingdongtai yqdt">
+        <div class="top">
+            <div class="keyword-wrapper" ref="wrapper">
+                <div class="scrollWrapper" style="width:1000px;">
+                    <template v-for="(item,index) in keyWords">
+                      <span class="spanItem" :class="{'active':testIndex == index}" @click="tabChange(index,item.themeId)">{{item.themeName}}</span>
+                    </template>
+                </div>
+            </div>
+            <div class="menuItem">
+                <div class="menu" @click="openMenu()">
+                    <i class="iconfont icon-shaixuan"></i>
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <mt-loadmore v-if="loaded" :top-method="loadTop" :bottom-method="loadBottom" :auto-fill="false" ref="loadmore">
+                <ul class="ulNews">
+                    <li v-for="(item,index) in news" style="">
+
+                        <div class="newstop" @click='openDetail(item)'>
+                            <span v-html="item.title"></span>
+                            <span class="tag" :class="classMap[item.sentimentType-1]">
+                        	{{item.sentimentType | newsTag}}</span>
+                        </div>
+                        <div class="newsMenu">
+                            <!-- <span>信息类型:{{item.type}}</span> -->
+                            <span class="source">来源：{{item.threadStarter}}</span>
+                            <span class="time">{{item.publishTime }}</span>
+                        </div>
+                        <div class="similar" v-show="item.dupIdCount > 1">
+                            <div class="title" @click="similarShow(item)">相似文章数({{item.dupIdCount-1}})<i class="iconfont icon-caret" :class="{'roll':item.sub_newShow}"></i></div>
+                            <ul v-show="item.sub_newShow">
+
+                                <li class="sub_news" v-for="(sub_news,subIndex) in item.similarNews" @click='openDetail(sub_news)'>
+                                    <p v-html="sub_news.title"></p>
+                                     <div class="tag">
+                                        <span>来源：{{sub_news.threadStarter}}</span>
+                                        <span class="time">{{sub_news.publishTime}}</span>
+                                    </div>
+                                </li>
+                                 <li v-show="item.dupIdCount> 6" class="moreSimilar" @click="openMoreSimilar(item)">查看更多相似文章</li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+
+                <div slot="top" class="mint-loadmore-top">
+                    <span v-show="topStatus !== 'loading'" :class="{ 'rotate': topStatus === 'drop' }"><i class='iconfont icon-shalou'></i>松开加载最新数据</span>
+                    <span v-show="topStatus === 'loading'">加载完毕</span>
+                </div>
+
+            </mt-loadmore>
+            <ongLoading v-if="!loaded"></ongLoading>
+            <notData v-if="notData"></notData>
+
+        </div>
+
+        <mt-popup id="_mt1" v-model="popupVisibleMenu" position="right">
+            <condFilter ref="condFilter" :themeId="themeId" v-on:closePanel="recieveMessage" v-on:postarry="recieveCondFilter"></condFilter>
+        </mt-popup>
+
+        <mt-popup id="_mt2" v-model="popupVisibleSearchRes" position="right">
+            <advancedSearchRes ref="advancedSearchRes" :resObj="similarSendData" v-on:fanhuiEvent="recieveMessage"></advancedSearchRes>
+        </mt-popup>
+        <v-footerTab></v-footerTab>
+    </div>
+</template>
+<script>
+import Vue from 'vue'
+import { mapState } from 'vuex'
+import BScroll from 'better-scroll'
+import {
+    Popup,
+    Loadmore
+} from 'mint-ui';
+import detail from 'components/detail/detail';
+import condFilter from 'components/condFilter/condFilter';
+import footerTab from 'components/footerTab/footerTab';
+import advancedSearchRes from 'components/advancedSearchRes/advancedSearchRes';
+import axios from 'axios';
+import qs from 'qs'
+import ongLoading from 'components/pageTips/ongLoading/ongLoading';
+import notData from 'components/pageTips/notData/notData';
+
+export default {
+    data() {
+            return {
+                loaded:false,
+                news: [],
+                classMap: ['danger', 'middle', 'safe'],
+                allLoaded: false,
+                keyWords: [],
+                condFilter: {},
+                testIndex: 0,
+                popupVisibleContent: false,
+                popupVisibleMenu: false,
+                popupVisibleSearchRes:false,
+                selectedPage: {},
+                themeId:"",
+                topStatus: '',
+                similarNews:[],
+                articleId:"123456",
+                articleIditem:"",
+                userId:"",
+                page: 1,
+                pageSize: 10,
+                sendObj:"",
+                similarSendData:{},
+                dupId:"",
+                notData:false
+
+            }
+        },
+        activated(){
+          if(!!this.$store.state.user.reflash[0]){
+            this.render();
+          }
+        },
+       // created() {
+//            this.$nextTick(function() {
+//                this.render();
+//            })
+//            var _this = this;
+//            console.log("2132213123213123: "+this.$route.params.searchKeys)
+           //  if(this.$route.params.searchKeys == "moreSim"){
+               // alert(123)
+                //主题和样式变更
+             /*  let item=this.$route.params.item;
+               var themeId = this.$route.params.themeId;
+               this.themeId = themeId;
+               this.testIndex = this.$route.params.testIndex;
+               console.log(this.testIndex)
+               this.dupId = this.$route.params.dupId;
+               setTimeout(function(){
+                    console.log("舆情动态接受到详情页的数据："+JSON.stringify(item))
+                    _this.openMoreSimilar(item)
+                },10)*/
+            // }
+      //  },
+        computed:{
+            _similarSendData :function(){
+                return this.similarSendData
+            }
+        },
+        methods: {
+            //调取关键词接口
+            renderKeywords:function(){
+                let userId = this.$store.state.user.userId;
+                return axios.post('/themeapp/getTheme',qs.stringify({'userId':userId}));
+            },
+            //调取新闻列表接口
+            renderList:function(themeId){
+                let userId = this.$store.state.user.userId;
+                this.userId =this.$store.state.user.userId;
+                let _themeId;
+                _themeId = this.themeId?this.themeId:"";
+
+                //这里先判断是不是点了条件筛选过来的，
+                //如果没点就走默认的参数，点了就取完整的参数
+                let listData;
+                var notCondFilter = {
+                        'userId':userId,
+                        'themeId':_themeId,
+                        'page':this.page,
+                        'pageSize':this.pageSize
+                };
+
+                if(this.sendObj === "")
+                {
+                    listData = notCondFilter
+                }
+                else{
+                    listData = this.sendObj;
+                }
+
+//                console.log("列表传送的数据：" + JSON.stringify(listData));
+
+                return axios.post('/themeapp/queryThemeArticle',
+                    qs.stringify(listData));
+            },
+
+            onlyRenderNewsList:function(){
+                var _this = this;
+                _this.notData = false;
+                axios.all([this.renderList()])
+                .then(axios.spread(function(list){
+
+                     if(list.data.pager.listPages.length !== 0){
+                        _this.news = (_this.news).concat(list.data.resultList);
+                     }
+                     else
+                     {
+                        _this.notData = true;
+                     }
+
+                     _this.loaded = true;
+                    /*_this.$nextTick(function() {
+                        _this._initScroll();
+                    })*/
+                /*     _this.allLoaded = true; // 若数据已全部获取完毕
+                     _this.$refs.loadmore.onBottomLoaded();*/
+
+
+
+                })).catch(function (error) {
+                    console.log('错误信息： '+JSON.stringify(error));
+                });;
+            },
+
+            //调取相似新闻列表接口
+            renderSimList:function(item,duplicates){
+                 let userId = this.$store.state.user.userId;
+                return axios.post('/themeapp/queryThemeArticle', qs.stringify({
+                    'userId': userId,
+                    'themeId': this.themeId,
+                    'pageSize':6,
+                    'dupId':duplicates
+                })).then(function(res) {
+
+                   Vue.set(item,"similarNews",res.data.resultList)
+
+
+                }).catch(function (error) {
+                    console.log('错误信息： '+error);
+                });
+
+
+            },
+            render: function() {
+              this.$store.commit('reflashClear','0');
+                var _this = this;
+                _this.notData = false;
+                axios.all([this.renderKeywords(),this.renderList()])
+                .then(axios.spread(function(keywordRes,list){
+                    //两个请求现在都完成
+                    // console.log("列表返回： "+JSON.stringify(list))
+                     _this.keyWords = keywordRes.data.themeList;
+                     //_this.news = list.data.resultList;
+                     if(list.data.pager.listPages.length !== 0){
+                        _this.news = (_this.news).concat(list.data.resultList);
+                     }
+                     else
+                     {
+                        _this.notData = true;
+                     }
+                     //默认设置keywords列表中第一个的themeId
+                     _this.themeId ===""? keywordRes.data.themeList[0].themeId : _this.themeId;
+                     _this.loaded = true;
+                    _this.$nextTick(function() {
+                        _this._initScroll();
+                    })
+                     _this.allLoaded = true; // 若数据已全部获取完毕
+                     _this.$refs.loadmore.onBottomLoaded();
+                })).catch(function (error) {
+                    console.log('错误信息： '+JSON.stringify(error));
+                });;
+            },
+            similarShow: function(item) {
+                console.log(JSON.stringify(item))
+                if (typeof item.sub_newShow === 'undefined') {
+                    //全局注册一个属性
+                    Vue.set(item, "sub_newShow", true);
+
+                    //局部注册
+                    //this.$set(item,"checked",true)
+                    this.renderSimList(item,item.duplicates);
+                } else {
+                    item.sub_newShow = !item.sub_newShow
+
+                }
+
+                //this.roll = !this.roll
+            },
+            _initScroll() {
+                // 计算滚动区域宽度
+                var contentWidth = 30;
+                var spanItem = document.getElementsByClassName('spanItem');
+                var itemLength = spanItem.length;
+                for (let i = 0; i < itemLength; i++) {
+                    contentWidth += spanItem[i].offsetWidth;
+                    //console.log("spanItem" + i + ":" + spanItem[i].offsetWidth)
+                }
+                document.querySelector('.scrollWrapper').style.width = contentWidth + 'px';
+//                console.log('总宽度是' + contentWidth)
+                this.keyWordScroll = new BScroll(this.$refs.wrapper, {
+                    scrollX: true,
+                    scrollY: false,
+                    click: true
+                });
+                 this.keyWordScroll.on('scroll', (pos) => {
+                  console.log(pos.x + '~' + posx.y)
+                })
+            },
+            tabChange: function(index,themeId) {
+                console.log(index)
+                this.testIndex = index;
+                this.themeId = themeId
+                this.loaded = false
+                this.page = 1;
+                this.notData = false;
+                var _this = this;
+                console.log("更换主题后的themeId:" + this.themeId);
+                //重新渲染新闻列表
+                let tabData;
+                let changeThemeData = {
+                        'userId':this.$store.state.user.userId,
+                        'themeId':themeId,
+                        'page':this.page,
+                        'pageSize':this.pageSize,
+                        "sentiment":"9",
+                        "mediaType":"0",
+                        "timeType":"day"
+                };
+                if(this.sendObj === "")
+                {
+                    tabData = changeThemeData
+                }
+                else{
+                    tabData = this.sendObj;
+                    tabData.themeId = themeId;
+                }
+                axios.post('/themeapp/queryThemeArticle', qs.stringify(tabData))
+                .then(function(res) {
+                //debugger
+                     if(res.data.pager.listPages.length !== 0){
+                        _this.news = res.data.resultList;
+                     }
+                     else
+                     {
+                        _this.notData = true;
+                     }
+                   _this.loaded = true;
+                  // console.log('更换主题后的新闻列表'+JSON.stringify(res.data.resultList))
+                }).catch(function (error) {
+                    console.log('错误信息： '+error);
+                });
+
+
+            },
+            openMenu:function(){
+                this.popupVisibleMenu = true;
+                this.loaded = false;
+                this.$refs.condFilter.renderCond();
+
+            },
+            openDetail: function(item) {
+                this.popupVisibleContent = true;
+                //this.selectedPage = item;
+                this.articleId = item.id;
+                this.articleIditem = item.id;
+                //this.$router.push('/detail');
+//                console.log(this.$refs.detail)
+                this.$router.push({name: 'detail', params: {id: item.id}});
+//                console.log("this.articleId："+this.articleId);
+            },
+
+            openMoreSimilar:function(item){
+                var _this=this
+                console.log("相似文章ID"+JSON.stringify(item.duplicates))
+                var notCondFilter  = {
+                        'userId':this.$store.state.user.userId,
+                        'themeId':this.themeId,
+                        'page':"1",
+                        'pageSize':"10",
+                        "sentiment":"9",
+                        "mediaType":"0",
+                        "timeType":"day",
+                        "dupId":item.duplicates || this.dupId,
+                        "title":"更多相似文章",
+                        "testIndex":this.testIndex
+                };
+
+
+
+                if(this.sendObj === "")
+                {
+                    console.log("11111111111111111111111111111111")
+                    _this.similarSendData = notCondFilter;
+                }
+                else{
+                    console.log("22222222222222222222222222222222")
+                    _this.similarSendData = this.sendObj;
+                    _this.similarSendData.title="更多相似文章"
+                    _this.similarSendData.dupId = item.duplicates;
+                }
+                console.log("舆情动态发送的数据："+JSON.stringify(this.similarSendData));
+                setTimeout(this.$refs.advancedSearchRes.moreSimiliar,500)
+                //this.$refs.advancedSearchRes.moreSimiliar()
+            	this.popupVisibleSearchRes = true;
+            },
+            recieveMessage: function(txt) {
+                if (txt === 'close') {
+                    this.popupVisibleContent = false;
+                } else if (txt == 'closeFilter') {
+                    this.popupVisibleMenu = false;
+                }
+                else if(txt == 'advancedSearchRes'){
+                	this.popupVisibleSearchRes = false;
+                }
+
+                this.loaded = true;
+
+
+            },
+
+            recieveCondFilter: function(value) {
+
+                //alert(value)
+                var _this = this;
+                this.sendObj = value;
+                this.loaded = false;
+                console.log('yuqingdongtai接受到的'+value)
+
+                axios.post('/themeapp/queryThemeArticle', qs.stringify(value))
+                .then(function(res) {
+                   _this.news = res.data.resultList;
+                   _this.loaded = true;
+                   //console.log('查询后列表返回'+JSON.stringify(res.data.resultList))
+                }).catch(function (error) {
+                    console.log('错误信息： '+error);
+                });
+
+
+
+
+
+            },
+            handleTopChange(status) {
+
+                this.topStatus = status;
+            },
+
+            loadTop(id) {
+                //刷新列表
+                this.page = 1;
+                this.news.length = 0;
+                console.log("刷新时候主题ID："+this.themeId)
+                //this.render();
+                this.onlyRenderNewsList();
+                this.$refs.loadmore.onTopLoaded();
+            },
+            loadBottom(id) {
+                // 加载更多数据
+
+                console.log('正在上拉加载。。')
+
+                this.page++;
+                this.onlyRenderNewsList();
+
+
+
+            }
+        },
+        filters: {
+            newsTag: function(value) {
+                switch (value) {
+                    case "9":
+                        return '全部'
+                        break;
+                    case "1":
+                        return '负面'
+                        break;
+                    case "2":
+                        return '中性'
+                        break;
+                    case "3":
+                        return '正面'
+                        break;
+                    default:
+
+                }
+            }
+        },
+        components: {
+            Popup,
+            detail,
+            condFilter,
+            advancedSearchRes,
+            ongLoading,
+            notData,
+            'v-footerTab': footerTab
+        }
+}
+
+
+</script>
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+/*.mint-loadmore{height:calc(100vh - 110px) }*/
+#_mt,#_mt1,#_mt2{height: 100%!important; width: 100%!important;}
+/*.mint-popup{z-index:10!important;}*/
+
+#app{
+    display: flex;
+}
+.content{
+    flex: 1;
+    overflow-y: auto;
+    /*z-index: 11!important;*/
+    position: relative;
+}
+.footTab{
+    position: static;
+}
+.yqdt .top {
+    /*display: flex;*/
+    height: 45px;
+    line-height: 43px;
+    background-color: #1c2532;
+    position: fixed;
+    width: 100%;
+    z-index: 999;
+    overflow: hidden;
+}
+
+.content {
+   /* padding: 40px 0 60px 0;*/
+    height: calc(100vh - 100px);
+    padding-top:40px;
+}
+
+.yqdt .content ul li {
+    padding: 10px;
+    box-sizing: border-box;
+  	/*height: 100px;*/
+    border-bottom: 1px solid #ccc;
+}
+
+.yqdt .content ul li .newstop {
+    width: 100%;
+    margin-bottom: 15px;
+    line-height: 24px;
+    font-size: 16px;
+   /* overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;*/
+}
+
+.yqdt .content ul li .newstop .tag {
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.yqdt .content ul li .newsMenu {
+    overflow: hidden;
+}
+
+.yqdt .content ul li .newsMenu span.source {
+    float: left;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    color: #8a8a8a;
+    font-size: 14px;
+    width: 140px;
+}
+
+.yqdt .content ul li .newsMenu span.time {
+    width: 150px;
+    float: right;
+    text-align: right;
+}
+
+.similar {
+    text-align: right;
+    font-size: 12px;
+}
+
+.similar .title {
+
+    width: 100%;
+
+    margin-top: 15px;
+    font-size: 14px;
+    color: #ff3333;
+}
+
+.similar ul {
+    width: 100%
+}
+
+.similar .tag {
+    display: flex;
+    flex-direction: row;
+
+}
+
+.similar .tag {
+    flex: 1;
+}
+
+.similar .tag span {
+    line-height: 24px;
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+}
+
+.yqdt .content .similar .tag span.time {
+   margin-left: 20px;
+}
+
+.similar .title_news {
+    width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 5px;
+}
+
+.similar  ul li{
+    border-bottom: none!important;
+}
+
+.yqdt .content ul li .similar .sub_news{
+	font-size: 14px;
+	text-align: left;
+	padding: 10px;
+}
+
+
+.yqdt .content ul li .similar .sub_news:last-child{
+	font-size: 14px;
+	border-bottom: none;
+}
+
+
+
+
+.tag.middle {
+    color: #fff;
+    background-color: #55a4e1;
+
+}
+
+.tag.danger {
+    color: #fff;
+    background-color: #ff6c6c
+}
+
+.tag.safe {
+    color: #fff;
+    background-color: #35c870
+}
+
+.icon-caret {
+    transition: all .5s;
+    margin-top: -1px;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+}
+
+.roll {
+    transform: rotate(180deg);
+    transform-origin:60% 40%;
+
+}
+
+.yqdt .top {}
+.mint-loadmore-top{
+    /*margn-top:0;*/
+}
+.keyword-wrapper {
+    float: left;
+    width: 87%;
+    overflow: hidden;
+}
+
+.scrollWrapper {
+    white-space: nowrap;
+}
+
+.scrollWrapper span {
+    color: #fff;
+    font-size: 14px;
+    padding: 0 10px;
+    height: 97%;
+    display: inline-block;
+    height: 45px;
+    box-sizing: border-box;
+}
+
+.keyword-wrapper span.active {
+    color: #ff3333;
+    border-bottom: 3px solid red
+}
+
+.menuItem {
+    width: 40px;
+    float: right;
+    font-size: 24px;
+    line-height: 35px;
+}
+
+.menuItem > div {
+    flex: 1;
+    text-align: center;
+}
+
+.menuItem i {
+    font-size: 20px;
+    color: #fff;
+    line-height: 42px;
+}
+
+.yqdt .content ul li.moreSimilar{ border-bottom: none; text-align: center; font-size: 14px; color: #ff3333; }
+</style>

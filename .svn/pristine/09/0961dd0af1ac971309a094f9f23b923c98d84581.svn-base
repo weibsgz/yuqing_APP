@@ -1,0 +1,86 @@
+<style lang="less" scoped>
+
+</style>
+<template>
+  <div>
+    <div class="">
+      <input placeholder="请输入账号" type="number" v-model.trim="form.id" v-on:blur="showMsg('0')">
+      <div v-show="!!isSubmit[0]&&!!phoneMsg">{{phoneMsg}}</div>
+    </div>
+    <div class="">
+      <input placeholder="请输入密码" type="password" v-model.trim="form.password" v-on:blur="showMsg('1')">
+      <div v-show="!!isSubmit[1]&&!!passwordMsg">{{passwordMsg}}</div>
+    </div>
+    <mt-button type="primary" @click.native="submitLogin">{{ status ? '正在登录中...' : '登录' }}</mt-button>
+    <mt-button type="danger"  @click.native="register">快速注册</mt-button>
+  </div>
+</template>
+<script>
+  import Vue from 'vue';
+  import { Button } from 'mint-ui';
+  import {mapActions} from 'vuex'
+  import {USER_SIGNIN} from 'store/user'
+  import axios from 'axios'
+  Vue.component(Button.name, Button);
+  export default {
+    data() {
+      return {
+        status: false, //true 已经提交过， false没有提交过
+        form: {
+          id: '',
+          password: ''
+        },
+        isSubmit:[]//默认不显示报错
+      }
+    },
+    // computed property for form validation state
+    computed: {
+      phoneMsg:{
+        get: function() {
+          if (!this.form.id) {
+            return '请输入手机号'
+          }else if( this.form.id.toString().length != 11){
+            return '请输入有效的手机号码'
+          }else{
+            return false;
+          }
+        }
+      },
+      passwordMsg:{
+        get: function() {
+          if (!this.form.password) {
+            return '请输入密码'
+          }else if(!/^[A-Za-z0-9]+$/.test(this.form.password) || this.form.password.length < 6||this.form.password.length>12){
+            return '密码只能是6~12位的英文和数字组合'
+          }else{
+            return false;
+          }
+        }
+      }
+    },
+    methods: {
+      ...mapActions([USER_SIGNIN]),
+    submitLogin() {
+      if (!!this.phoneMsg || !!this.passwordMsg)  {return}
+      this.status = true
+      var _this=this;
+      // axios.post('loginapp/loginInfo', {
+//    axios.get('static/data/login.json', {
+//      "phone": _this.form.id,
+//      "password": _this.form.password
+//    }).then(function (res) {
+        _this.USER_SIGNIN(_this.form)
+        _this.$router.replace({path: '/yuqingdongtai'})
+        //this.$router.go(-1)
+        _this.status = false
+//    });
+    },
+    register(){
+      this.$router.replace({path: '/register'})
+    },
+    showMsg(the){
+      this.isSubmit[the]=true;//打开当前校验显示
+    }
+  }
+  }
+</script>

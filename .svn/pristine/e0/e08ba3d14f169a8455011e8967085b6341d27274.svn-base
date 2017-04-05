@@ -1,0 +1,409 @@
+<template>
+<div class="warp">
+  <div class="module module1">
+    <h2>九次方大数据带您数说“{{detailObj.themeName}}”舆情专题</h2>
+    <div class="detail">
+      <div class="detail-left"><img class="logo" src="./images/logo_03.png" alt="">九次方大数据</div>
+      <div class="detail-right">生成时间：{{detailObj.reportTime}}</div>
+    </div>
+  </div>
+  <div class="module module2">
+    <div class="content">
+      九次方大数据在监测周期{{detailObj.startTime}}分至{{detailObj.endTime}}分围绕关键词“{{detailObj.keyWords}}”对互联网上的相关舆情进行了深入分析，共监测相关舆论文章{{detailObj.totalCount}}篇，舆论最高峰出现在{{detailObj.maxTime}}，共有{{detailObj.maxCount}}条相关文章，详细分析如下：
+    </div>
+  </div>
+  <div class="module module3">
+    <div class="charttitle">声量走势</div>
+    <div class="chartContent">
+      <div id="chart1">
+        <img :src="detailObj.picUrl+'/1.png'">
+      </div>
+    </div>
+    <div class="chartDetail">从声量走势中可看出舆情的爆发点是{{detailObj.maxTime}}，新闻数据
+      较为突出。</div>
+  </div>
+  <div class="module module4">
+    <div class="charttitle">媒体类型覆盖</div>
+    <div class="chartContent">
+      <div id="chart2">
+        <img :src="detailObj.picUrl+'/2.png'">
+      </div>
+    </div>
+    <div class="chartDetail">在所有传播媒体类型中，新闻为主要传播媒体阵营，
+      舆情信息数量占总数的{{detailObj.maxPercent}}。</div>
+  </div>
+  <div class="module module5">
+    <div class="charttitle">媒体来源排行</div>
+    <div class="chartContent">
+      <div id="chart3">
+        <img :src="detailObj.picUrl+'/3.png'">
+      </div>
+    </div>
+    <div class="chartDetail">在媒体来源中，{{detailObj.top1Name}}对此次事件的曝光力度最大，舆情信息占所有媒体之首，在{{detailObj.dataDes}}内有{{detailObj.top1Count}}条舆情信息，{{detailObj.top2Name}}位居第二，有{{detailObj.top2Count}}条舆情信息。</div>
+  </div>
+
+  <div class="module module7">
+    <div class="charttitle">情感走势</div>
+    <div class="chartContent">
+      <div id="chart5">
+        <img :src="detailObj.picUrl+'/4.png'">
+      </div>
+    </div>
+    <div class="chartDetail">通过情感走势图可看出占比最大的{{detailObj.maxCountName}}舆情在{{detailObj.maxCountTime}}达到峰值。</div>
+  </div>
+  <div class="module module6">
+    <div class="charttitle">情感分布</div>
+    <div class="chartContent">
+      <div id="chart4">
+        <img :src="detailObj.picUrl+'/5.png'">
+      </div>
+    </div>
+    <div class="chartDetail">监测期内，当前主题{{detailObj.smaxCountName}}舆情占比较大，占比{{detailObj.smaxPercent}}，{{detailObj.smaxCountName}}舆情主要集中在“川普发文怒怼梅姨:失败者希拉里的马屁精”。</div>
+  </div>
+  <div class="module module8">
+    <div class="charttitle">地域分布</div>
+    <div class="chartContent">
+      <div id="chart6">
+        <img :src="detailObj.picUrl+'/7.png'">
+      </div>
+    </div>
+  </div>
+  <div class="module module9">
+    <div class="informationtip">
+      <dl>
+        <dt><span class="fl informationtip1">排名</span><span class="fl informationtip2">省份</span><span
+          class="fl informationtip3">信息数</span></dt>
+        <dd v-for="(item,index) in detailObj.areaList">
+          <span class="fl informationtip1">{{index+1}}</span><span
+          class="fl informationtip2">{{item.name}}</span><span class="fl informationtip3">{{item.value}}</span>
+        </dd>
+
+        <!--<dd>-->
+          <!--<span class="fl informationtip1">02</span><span-->
+          <!--class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>-->
+        <!--</dd>-->
+        <!--<dd>-->
+          <!--<span class="fl informationtip1">03</span><span-->
+          <!--class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>-->
+        <!--</dd>-->
+        <!--<dd>-->
+          <!--<span class="fl informationtip1">04</span><span-->
+          <!--class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>-->
+        <!--</dd>-->
+        <!--<dd>-->
+          <!--<span class="fl informationtip1">05</span><span-->
+          <!--class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>-->
+        <!--</dd>-->
+        <!--<dd>-->
+          <!--<span class="fl informationtip1">06</span><span-->
+          <!--class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>-->
+        <!--</dd>-->
+        <!--<dd>-->
+          <!--<span class="fl informationtip1">07</span><span-->
+          <!--class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>-->
+        <!--</dd>-->
+        <!--<dd>-->
+          <!--<span class="fl informationtip1">08</span><span-->
+          <!--class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>-->
+        <!--</dd>-->
+        <!--<dd>-->
+          <!--<span class="fl informationtip1">09</span><span-->
+          <!--class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>-->
+        <!--</dd>-->
+        <!--<dd>-->
+          <!--<span class="fl informationtip1">10</span><span-->
+          <!--class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>-->
+        <!--</dd>-->
+      </dl>
+      <div class="beizhu">(注：显示排名前十的省份)</div>
+    </div>
+  </div>
+  <div class="module module10">
+    <p class="detail">通过舆情地域分布可得出沿海一带对“{{detailObj.themeName}}”的舆情指数较高，除此之外，{{name[0]}}、{{name[1]}}、{{name[2]}}的舆情关注度也很高。</p>
+    <div class="erweimaContent">
+      <img class="erweima" src="./images/weixin_03.png" alt="">
+    </div>
+    <p class="xiazai">下载九次方舆情监测手机app，关注更多舆情事件</p>
+  </div>
+</div>
+</template>
+<script>
+  import axios from 'axios';
+  import qs from 'qs'
+  export default {
+      data(){
+        return{
+            detailObj:{
+              areaList:[]
+            },
+          name:[]
+        }
+      },
+    created(){
+        this.init();
+    },
+    methods:{
+      init:function () {
+        var _this=this;
+        axios.post('/shareapp/getReportData', qs.stringify({
+          'myKey':this.$route.params.myKey
+        })).then(function(res) {
+          _this.detailObj=res.data;
+          _this.name[0]=res.data.areaList[0].name;
+          _this.name[1]=res.data.areaList[1].name;
+          _this.name[2]=res.data.areaList[2].name;
+      console.log(res)
+        }).catch(function (error) {
+          console.log('错误信息： '+error);
+        });
+      }
+    }
+  }
+</script>
+<style scoped>
+  .warp {
+    background: #f4f4f4 !important;
+  }
+  .module1 h2 {
+    font-size: 20px;
+    line-height: 25px;
+    color: #000000;
+    font-weight: 700;
+  }
+  .module1{
+    padding:0 16px ;
+    padding-top: 15px;
+    border-bottom: 1px solid #dbdbdb;
+  }
+  .module1 .detail {
+    height: 50px;
+    line-height: 50px;
+    font-size: 14px;
+    color: #9e9e9e;
+  }
+
+  .module1 .detail-left {
+    float: left;
+    display: inline-block;
+    position: relative;
+    padding-left: 30px;
+  }
+
+  .module1 .detail-right {
+    float: right;
+    display: inline-block;
+  }
+
+  .logo {
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    left: 0;
+    top: 12px;
+  }
+  .module2{
+    padding-top: 12px;
+  }
+  .module2 .content{
+    padding: 0 16px;
+    line-height: 30px;
+    font-size: 14px;
+    color: #3d3d3d;
+  }
+  .charttitle{
+    padding: 0 16px;
+    height: 57px;
+    line-height: 57px;
+    font-size: 18px;
+    color: #000000;
+    font-weight: 700;
+  }
+  .chartContent{
+    /*padding: 0 4px;*/
+    /*height: 224px;*/
+    background: #FFF;
+    margin: 0 auto;
+    margin-bottom: 15px;
+    max-width: 375px;
+  }
+  .chartContent img{
+    text-align: center;
+    width: 100%;
+  }
+  .chartDetail{
+    padding: 0 16px;
+    line-height: 24px;
+    font-size: 16px;
+    color: #000000;
+  }
+  .h250{
+    height: 250px;
+  }
+  .h300{
+    height: 300px;
+  }
+
+  .module9{
+    background: #FFF;
+    height: 600px;
+  }
+
+  .module9{
+    padding: 0 16px;
+  }
+  .informationtip {
+    padding: 0 10px;
+    margin: 0 auto;
+  }
+
+  .informationtip dt {
+    height: 42px;
+    line-height: 42px;
+    color: #8a8a8a;
+    font-size: 14px;
+    position: relative;
+    padding-left: 22px;
+  }
+
+  .informationtip dd {
+    height: 42px;
+    line-height: 42px;
+    color: #aaa5a2;
+    padding-left: 22px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    position: relative;
+    background: #f9f9f9;
+  }
+
+  .informationtip dd .informationtip3 {
+    color: #aaa5a2;
+  }
+  .informationtip dd .informationtip2 {
+    color: #000000;
+  }
+  .informationtip dd .informationtip1 {
+    color: #aaa5a2;
+  }
+
+  .informationtip dd:nth-of-type(1) {
+    background: #e5f5fe;
+  }
+
+  .informationtip dt .informationtip1 {
+    border: 1px solid #FFF;
+  }
+
+  .informationtip dd:nth-of-type(1) .informationtip1 {
+    background: #55cbe0;
+    border: 1px solid #55cbe0;
+    color: #FFF;
+  }
+
+  .informationtip dd:nth-of-type(1) .informationtip3 {
+    color: #00ddfe;
+  }
+
+  .informationtip dd:nth-of-type(2) {
+    background: #e5f5fe;
+
+  }
+
+  .informationtip dd:nth-of-type(2) .informationtip1 {
+    background: #55cbe0;
+    border: 1px solid #55cbe0;
+    color: #FFF;
+  }
+
+  .informationtip dd:nth-of-type(2) .informationtip3 {
+    color: #00ddfe;
+  }
+
+  .informationtip dd:nth-of-type(3) {
+    background: #e5f5fe;
+
+  }
+
+  .informationtip dd:nth-of-type(3) .informationtip1 {
+    background: #55cbe0;
+    border: 1px solid #55cbe0;
+    color: #FFF;
+  }
+
+  .informationtip dd:nth-of-type(3) .informationtip3 {
+    color: #00ddfe;
+  }
+
+  .informationtip1, .informationtip2, .informationtip3 {
+    display: block;
+    text-align: center;
+  }
+
+  .informationtip .informationtip1 {
+    position: absolute;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #a39e9c;
+  }
+
+  .informationtip2 {
+    width: 80%;
+  }
+
+  .informationtip3 {
+    width: 20%;
+  }
+
+  .fl {
+    float: left;
+  }
+
+  .beizhu {
+    font-size: 12px;
+    text-align: right;
+    color: #8a8a8a;
+  }
+
+  .module10{
+    padding:22px 16px;
+  }
+  .module10 .detail{
+    line-height: 24px;
+    font-size: 14px;
+    color: #000000;
+  }
+  .module10 .erweimaContent{
+    height: 240px;
+    position: relative;
+  }
+  .module10 .erweima{
+    width: 175px;
+    height: 175px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin:auto;
+  }
+
+  .module10 .xiazai{
+    line-height: 24px;
+    font-size: 14px;
+    color: #000000;
+    text-align: center;
+  }
+  /*#chart1,#chart2,#chart3,#chart4{*/
+    /*height: 100%;*/
+    /*!*height:224px;*!*/
+  /*}*/
+  /*#chart5{*/
+    /*height: 100%;*/
+    /*!*height: 250px;*!*/
+  /*}*/
+  /*#chart6{*/
+    /*height: 100%;*/
+    /*!*height: 300px;*!*/
+  /*}*/
+</style>

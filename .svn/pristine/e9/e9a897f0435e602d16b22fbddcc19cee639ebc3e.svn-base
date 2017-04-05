@@ -1,0 +1,59 @@
+import Vue from 'vue'
+import Router from 'vue-router'
+import yuqingdongtai from 'components/yuqingdongtai/yuqingdongtai'
+import yuqingfenxi from 'components/yuqingfenxi/yuqingfenxi'
+import advancedSearch from 'components/advancedSearch/advancedSearch'
+import personalCenter from 'components/personalCenter/personalCenter'
+import messageTip from 'components/messageTip/messageTip'
+import login from 'pages/login/index'
+import signout from 'pages/signout/index'
+import register from 'pages/register/index'
+Vue.use(Router)
+
+export default new Router({
+  routes: [
+    {
+      path: '/yuqingdongtai',
+      name: 'yuqingdongtai',
+      component: yuqingdongtai
+    },
+    {
+      path: '/yuqingfenxi',
+      name: 'yuqingfenxi',
+      component: yuqingfenxi
+    },
+    {
+      path: '/advancedSearch',
+      name: 'advancedSearch',
+      component: advancedSearch
+    },
+    {
+      path: '/messageTip',
+      name: 'messageTip',
+      component: messageTip
+    },
+    {
+      path: '/personalCenter',
+      name: 'personalCenter',
+      component: personalCenter
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: login
+    },
+    {
+      path: '/signout',
+      name: 'signout',
+      component: signout
+    },
+    {
+      path: '/register',
+      meta: { auth: false },
+      name: 'register',
+      component: register
+    },
+  ],
+  linkActiveClass: 'active'
+})
+

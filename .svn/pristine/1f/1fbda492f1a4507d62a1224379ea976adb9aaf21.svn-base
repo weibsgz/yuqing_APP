@@ -1,0 +1,239 @@
+body {
+  background: #f4f4f4;
+}
+
+
+.module1 h2 {
+  font-size: 20px;
+  line-height: 25px;
+  color: #000000;
+  font-weight: 700;
+}
+.module1{
+  padding:0 16px ;
+  padding-top: 15px;
+  border-bottom: 1px solid #dbdbdb;
+}
+.module1 .detail {
+  height: 50px;
+  line-height: 50px;
+  font-size: 14px;
+  color: #9e9e9e;
+}
+
+.module1 .detail-left {
+  float: left;
+  display: inline-block;
+  position: relative;
+  padding-left: 30px;
+}
+
+.module1 .detail-right {
+  float: right;
+  display: inline-block;
+}
+
+.logo {
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  left: 0;
+  top: 12px;
+}
+.module2{
+  padding-top: 12px;
+}
+.module2 .content{
+  padding: 0 16px;
+  line-height: 30px;
+  font-size: 14px;
+  color: #3d3d3d;
+}
+.charttitle{
+  padding: 0 16px;
+  height: 57px;
+  line-height: 57px;
+  font-size: 18px;
+  color: #000000;
+  font-weight: 700;
+}
+.chartContent{
+  padding: 0 16px;
+  height: 224px;
+  background: #FFF;
+  margin-bottom: 15px;
+
+}
+.chartDetail{
+  padding: 0 16px;
+  line-height: 24px;
+  font-size: 16px;
+  color: #000000;
+}
+.h250{
+  height: 250px;
+}
+.h300{
+  height: 300px;
+}
+
+.module9{
+  background: #FFF;
+  height: 600px;
+}
+
+.module9{
+  padding: 0 16px;
+}
+.informationtip {
+  padding: 0 10px;
+  margin: 0 auto;
+}
+
+.informationtip dt {
+  height: 42px;
+  line-height: 42px;
+  color: #8a8a8a;
+  font-size: 14px;
+  position: relative;
+  padding-left: 22px;
+}
+
+.informationtip dd {
+  height: 42px;
+  line-height: 42px;
+  color: #aaa5a2;
+  padding-left: 22px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  position: relative;
+  background: #f9f9f9;
+}
+
+.informationtip dd .informationtip3 {
+  color: #aaa5a2;
+}
+.informationtip dd .informationtip2 {
+  color: #000000;
+}
+.informationtip dd .informationtip1 {
+  color: #aaa5a2;
+}
+
+.informationtip dd:nth-of-type(1) {
+  background: #e5f5fe;
+}
+
+.informationtip dt .informationtip1 {
+  border: 1px solid #FFF;
+}
+
+.informationtip dd:nth-of-type(1) .informationtip1 {
+  background: #55cbe0;
+  border: 1px solid #55cbe0;
+  color: #FFF;
+}
+
+.informationtip dd:nth-of-type(1) .informationtip3 {
+  color: #00ddfe;
+}
+
+.informationtip dd:nth-of-type(2) {
+  background: #e5f5fe;
+
+}
+
+.informationtip dd:nth-of-type(2) .informationtip1 {
+  background: #55cbe0;
+  border: 1px solid #55cbe0;
+  color: #FFF;
+}
+
+.informationtip dd:nth-of-type(2) .informationtip3 {
+  color: #00ddfe;
+}
+
+.informationtip dd:nth-of-type(3) {
+  background: #e5f5fe;
+
+}
+
+.informationtip dd:nth-of-type(3) .informationtip1 {
+  background: #55cbe0;
+  border: 1px solid #55cbe0;
+  color: #FFF;
+}
+
+.informationtip dd:nth-of-type(3) .informationtip3 {
+  color: #00ddfe;
+}
+
+.informationtip1, .informationtip2, .informationtip3 {
+  display: block;
+  text-align: center;
+}
+
+.informationtip .informationtip1 {
+  position: absolute;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #a39e9c;
+}
+
+.informationtip2 {
+  width: 80%;
+}
+
+.informationtip3 {
+  width: 20%;
+}
+
+.fl {
+  float: left;
+}
+
+.beizhu {
+  font-size: 12px;
+  text-align: right;
+  color: #8a8a8a;
+}
+
+.module10{
+  padding:22px 16px;
+}
+.module10 .detail{
+  line-height: 24px;
+  font-size: 14px;
+  color: #000000;
+}
+.module10 .erweimaContent{
+  height: 240px;
+  position: relative;
+}
+.module10 .erweima{
+  width: 175px;
+  height: 175px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin:auto;
+}
+
+.module10 .xiazai{
+  line-height: 24px;
+  font-size: 14px;
+  color: #000000;
+  text-align: center;
+}
+#chart1,#chart2,#chart3,#chart4{
+  height:224px;
+}
+#chart5{
+  height: 250px;
+}
+#chart6{
+  height: 300px;
+}

@@ -1,0 +1,1456 @@
+<template>
+  <div class="ratings">
+    <div class="title">
+      <h2>
+        <div class="bigTitle" v-on:click="seen=!seen">
+          <span>{{person}}</span>
+          <i class="xiala iconfont icon-caret"></i>
+        </div>
+        <ul class="bigTitle-item" v-if="seen">
+          <li v-for="(item,index) in bigTitles" @click="changeBigTitle(item)">{{item}}</li>
+        </ul>
+      </h2>
+      <i class="time iconfont icon-33 " v-bind:class="{ active:isActive1}" v-on:click="time"></i>
+      <i class="share iconfont icon-fenxiang1" v-bind:class="{active:isActive2}" v-on:click="share"></i>
+    </div>
+    <div class="timeSelect" v-if="seen2">
+      <div class="timeSelect-left">时间范围</div>
+
+      <div class="timeSelect-right">
+        <div v-for="(item,index) in times" class="timeSelect-right" @click="stime(index,item)">
+          <div class="timeSelect-right-item">
+            <div class="timeSelect-item time-item" :class="{'active4':testIndex == index}"><i
+              class="icongou iconfont icon-gou" v-if="testIndex == index"></i>{{item}}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="tabTitle">
+      <div v-for="(item,index) in tabs" class="tabTitle-item" :class="{'active5':TabIndex == index}"
+           @click="tabChange(index)">{{item}}
+        <span class="red-icon" v-if="TabIndex == index"></span>
+      </div>
+    </div>
+    <div class="tabContent">
+      <div v-if="TabIndex == 0">
+        <div class="moudle moudle11">
+          <div class="moudleTitle">声势走量</div>
+          <div class="moudleContent">
+            <div id="chart11">
+              <img class="chartimg" v-if="chart11Img" src="./shujujiazaizhong.png"/>
+              <img class="chartimg" v-if="!chart11Img" src="./zanwushuju.png"/>
+            </div>
+          </div>
+
+        </div>
+        <div class="moudle moudle12">
+          <div class="moudleTitle">媒体类型覆盖</div>
+          <div class="moudleContent">
+            <div id="chart12">
+              <img class="chartimg" v-if="chart12Img" src="./shujujiazaizhong.png"/>
+              <img class="chartimg" v-if="!chart12Img" src="./zanwushuju.png"/>
+            </div>
+          </div>
+
+        </div>
+        <div class="moudle moudle13">
+          <div class="moudleTitle">媒体来源排行榜</div>
+          <div class="moudleContent">
+            <div id="chart13">
+              <img class="chartimg" v-if="chart13Img" src="./shujujiazaizhong.png"/>
+              <img class="chartimg" v-if="!chart13Img" src="./zanwushuju.png"/>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div v-if="TabIndex == 1">
+        <div class="moudle moudle21">
+          <div class="moudleTitle">情感走势</div>
+          <div class="moudleContent">
+            <div id="chart21">
+              <img class="chartimg" v-if="chart21Img" src="./shujujiazaizhong.png"/>
+              <img class="chartimg" v-if="!chart21Img" src="./zanwushuju.png"/>
+            </div>
+          </div>
+
+        </div>
+        <div class="moudle moudle22">
+          <div class="moudleTitle">情感分析</div>
+          <div class="moudleContent">
+            <div id="chart22">
+              <img class="chartimg" v-if="chart22Img" src="./shujujiazaizhong.png"/>
+              <img class="chartimg" v-if="!chart22Img" src="./zanwushuju.png"/>
+            </div>
+          </div>
+
+        </div>
+        <div class="moudle moudle23">
+          <div class="moudleTitle">负面信息来源媒体</div>
+          <div class="moudleContent">
+            <div id="chart23">
+              <img class="chartimg" v-if="chart23Img" src="./shujujiazaizhong.png"/>
+              <img class="chartimg" v-if="!chart23Img" src="./zanwushuju.png"/>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div v-if="TabIndex == 2">
+        <div class="moudle moudle31">
+          <div class="moudleContent">
+            <div id="chart31">
+              <img class="chartimg" v-if="chart31Img" src="./shujujiazaizhong.png"/>
+              <img class="chartimg" v-if="!chart31Img" src="./zanwushuju.png"/>
+            </div>
+          </div>
+        </div>
+        <div class="moudle moudle32">
+          <div class="moudleContent">
+            <div class="informationtip">
+              <dl>
+                <dt><span class="fl informationtip1">排名</span><span class="fl informationtip2">省份</span><span
+                  class="fl informationtip3">信息数</span></dt>
+                <dd v-for="(item,index) in areaRankings">
+                  <span class="fl informationtip1">{{item.rank}}</span><span
+                  class="fl informationtip2">{{item.name}}</span><span class="fl informationtip3">{{item.value}}</span>
+                </dd>
+              </dl>
+              <div class="beizhu">(注：显示排名前十的省份)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <v-footerTab></v-footerTab>
+  </div>
+
+</template>
+
+<script>
+  import footerTab from 'components/footerTab/footerTab'
+  import share from 'components/share/index'
+  import echarts from 'echarts/lib/echarts.js';
+  import 'echarts/lib/chart/bar';
+  import 'echarts/lib/chart/pie';
+  import 'echarts/lib/chart/line';
+  import 'echarts/lib/chart/map';
+  import '../../../node_modules/echarts/map/js/china';
+  import axios from 'axios';
+  export default {
+    data(){
+      return {
+        popupShareVisible: false,//初始不显示弹出框
+        isActive1: false,
+        isActive2: false,
+        seen: false,
+        seen2: false,
+        seen3: false,
+        times: ["24小时", "一周", "一个月"],
+        selectTime: "24小时",
+        tabs: ["媒体分析", "情感分析", "地域分布"],
+        bigTitles: ["美国1", "美国2", "美国3"],
+        areaRankings: [],
+        testIndex: 0,
+        TabIndex: 0,
+        person: "美国总统",
+        chart11Img: true,
+        chart12Img: true,
+        chart13Img: true,
+        chart21Img: true,
+        chart22Img: true,
+        chart23Img: true,
+        chart31Img: true,
+        chart: null,
+        chart11Options: null,
+        chart12Options: null
+        ,
+        chart13Options: null
+        ,
+        chart21Options: null
+        ,
+        chart22Options: null
+        ,
+        chart23Options: null
+        ,
+        chart31Options: null
+      }
+    },
+    methods: {
+      time: function () {
+        this.isActive1 = !this.isActive1;
+        this.isActive2 = false;
+        this.seen2 = !this.seen2;
+      },
+      stime: function (index, item) {
+        this.testIndex = index;
+        this.selectTime = item;
+        var index = this.TabIndex;
+        var person = this.person;
+        this.seen2 = false;
+        var _self = this;
+        if (index == 0) {
+          setTimeout(function () {
+            _self.fncharts11();
+            _self.fncharts12();
+            _self.fncharts13();
+          }, 500);
+
+
+        }
+        ;
+        if (index == 1) {
+          setTimeout(function () {
+            _self.fncharts21();
+            _self.fncharts22();
+            _self.fncharts23();
+          }, 500);
+        }
+        ;
+        if (index == 2) {
+          setTimeout(function () {
+            _self.fncharts31();
+          }, 500);
+        }
+        ;
+      },
+      tabChange: function (index) {
+        this.TabIndex = index;
+        var _self = this;
+        if (index == 0) {
+          setTimeout(function () {
+            _self.fncharts11();
+            _self.fncharts12();
+            _self.fncharts13();
+          }, 500);
+
+
+        }
+        ;
+        if (index == 1) {
+          setTimeout(function () {
+            _self.fncharts21();
+            _self.fncharts22();
+            _self.fncharts23();
+          }, 500);
+        }
+        ;
+        if (index == 2) {
+          setTimeout(function () {
+            _self.fncharts31();
+          }, 500);
+        }
+        ;
+
+      },
+      changeBigTitle: function (item) {
+        this.person = item;
+        this.seen = false;
+        var selectTime = this.selectTime;
+        var index = this.TabIndex;
+        var _self = this;
+        if (index == 0) {
+          setTimeout(function () {
+            _self.fncharts11();
+            _self.fncharts12();
+            _self.fncharts13();
+          }, 500);
+
+
+        }
+        ;
+        if (index == 1) {
+          setTimeout(function () {
+            _self.fncharts21();
+            _self.fncharts22();
+            _self.fncharts23();
+          }, 500);
+        }
+        ;
+        if (index == 2) {
+          setTimeout(function () {
+            _self.fncharts31();
+          }, 500);
+        }
+        ;
+        console.log(item, selectTime)
+      }
+      ,
+      share: function () {
+        this.isActive2 = !this.isActive2;
+        this.isActive1 = false;
+        this.seen2 = false;
+        this.popupShareVisible = true;
+
+      }
+      ,
+      fncharts11: function (id) {
+
+        var _this = this
+        axios.get('static/data/yuqingfenxi.json', {}).then(function (res) {
+          var shengliangzoushi = res.data.meitifenxi.shengliangzoushi;
+          if (shengliangzoushi) {
+            var legendData = [];
+            var seriesData = []
+            var colors = ['#0787e8', '#ff4800', '#ffc600']
+            var timesData = shengliangzoushi[0].times;
+            shengliangzoushi.forEach(function (item, index) {
+              legendData.push(item.name);
+              var seriesObj = {
+                name: item.name,
+                type: 'line',
+                symbolSize: 5,
+                itemStyle: {
+                  normal: {
+                    color: colors[index]
+                  }
+                },
+                data: item.value
+              };
+              seriesData.push(seriesObj);
+            });
+            var options = {
+              tooltip: {trigger: 'axis'},
+              legend: {
+                top: '10',
+                right: '50',
+                textStyle: {color: '#6d6d6d'},
+                data: legendData
+              },
+              grid: {
+                left: '50',
+                right: '30',
+                bottom: '20',
+              },
+              xAxis: [
+                {
+                  type: 'category',
+                  axisLabel: {textStyle: {color: '#6d6d6d'}},
+                  axisLine: {lineStyle: {color: 'rgba(255,255,255,0.1)'}},
+                  axisTick: {show: false},
+                  data: timesData
+                }
+              ],
+              yAxis: [
+                {
+                  interval: 1000,
+                  axisTick: {show: false},
+                  axisLine: {show: false},
+                  axisLabel: {textStyle: {color: '#6d6d6d'}},
+                  splitLine: {lineStyle: {color: 'rgba(255,255,255,0.1)'}}
+                }
+              ],
+              series: seriesData
+            };
+            _this.chart11Options = options;
+            _this.chart = echarts.init(document.getElementById("chart11"));
+            _this.chart.setOption(options);
+          } else {
+            _this.chart11Options = null;
+            _this.chart11Img = false;
+          }
+          ;
+
+
+        });
+
+      }
+      ,
+      fncharts12: function (id) {
+        var _this = this
+        axios.get('static/data/yuqingfenxi.json', {}).then(function (res) {
+          var meitifugaileixing = res.data.meitifenxi.meitifugaileixing;
+          if (meitifugaileixing) {
+
+            var legendData = [];
+            var seriesData = []
+            var colors = ['#0787e8', '#ff4800', '#ffc600']
+            var options = {
+
+              tooltip: {
+                show: true,
+                formatter: "{d}%",
+              },
+              calculable: true,
+              series: [
+
+                {
+                  name: '',
+                  type: 'pie',
+                  center: ['50%', '48%'],
+                  radius: [30, 50],
+
+                  labelLine: {
+                    normal: {
+                      length: 6,
+                      length2: 30
+                    }
+                  },
+                  label: {
+                    normal: {
+                      position: 'outside',
+                      show: true,
+                      formatter: "{b}：\n\n{d}%",
+                      textStyle: {
+                        fontSize: 12
+                      }
+                    }
+                  },
+                  data: [
+                    {
+                      value: 220,
+                      name: '微博',
+                      icon: 'circle',
+                      itemStyle: {    //数据填充
+                        normal: {
+                          color: '#ff5757',          //颜色填充
+                        }
+                      },
+
+
+                    },
+                    {
+                      value: 170, name: '微信', icon: 'circle', itemStyle: {      //数据填充
+                      normal: {
+                        color: '#ff7e3e',           //颜色填充
+                      }
+                    },
+
+                    },
+                    {
+                      value: 170, name: '博客', icon: 'circle', itemStyle: {    //数据填充
+                      normal: {
+                        color: '#0084ff',           //颜色填充
+                      }
+                    },
+
+                    },
+                    {
+                      value: 160, name: '论坛', icon: 'circle', itemStyle: {   //数据填充
+                      normal: {
+                        color: '#19d600',           //颜色填充
+                      }
+                    },
+
+                    },
+
+                  ]
+                },
+
+              ]
+
+            };
+            _this.chart12Options = options;
+            _this.chart = echarts.init(document.getElementById("chart12"));
+            _this.chart.setOption(options);
+          } else {
+            _this.chart12Options = null;
+            _this.chart12Img = false;
+          }
+          ;
+
+
+        });
+
+      }
+      ,
+      fncharts13: function (id) {
+
+
+        var _this = this
+        axios.get('static/data/yuqingfenxi.json', {}).then(function (res) {
+          var meitilaiyuanpaihang = res.data.meitifenxi.meitilaiyuanpaihang;
+          if (meitilaiyuanpaihang) {
+            var legendData = [];
+            var seriesData = []
+            var colors = ['#0787e8', '#ff4800', '#ffc600']
+            var options = {
+              title: {
+                text: '',
+                textStyle: {
+                  fontSize: 12
+                }
+              },
+              tooltip: {
+                trigger: 'axis'
+              },
+              calculable: true,
+              legend: {
+                top: 10,
+                show: false,
+                textStyle: {
+                  color: "#333"
+                }
+              },
+              xAxis: [{
+                type: 'category',
+                data: ['新华网', '新浪微博', '海外网', '网易新闻', '西祠胡同'],
+                axisLine: {
+                  lineStyle: {
+                    color: "red",
+                    width: 1
+                  }
+                },
+                axisTick: {
+                  show: false
+                },
+                axisLabel: {
+                  formatter: '{value}'
+                  , textStyle: {
+                    color: '#333'
+                  }
+                }, splitLine: {
+                  show: false
+                }
+              }],
+              yAxis: [{
+                type: 'value',
+                name: '',
+                axisLabel: {
+                  formatter: '{value}'
+                  , textStyle: {
+                    color: '#333'
+                  }
+                },
+                axisLine: {
+                  lineStyle: {
+                    color: "#ccc",
+                    width: 1
+                  }
+                }, splitLine: {
+                  show: true,
+                  lineStyle: {
+                    color: '#ccc',
+                    type: "solid"
+                  }
+                }, axisTick: {
+                  show: false
+                }
+              }, {
+                type: 'value',
+                name: '',
+                axisLabel: {
+                  show: false,
+                  formatter: ''
+                }, axisTick: {
+                  show: false
+                },
+                axisLine: {
+                  lineStyle: {
+                    color: "#ccc",
+                    width: 1
+                  }
+                }, splitLine: {
+                  show: true,
+                  lineStyle: {
+                    color: 'rgba(0,0,0,0)',
+                    type: "dashed"
+                  }
+                }
+              }],
+              grid: {
+                x: '50',
+                x2: '30',
+                y: '40',
+                y2: '60'
+              },
+              series: [{
+                name: '实体消费额',
+                type: 'bar',
+                barWidth: '60%',
+                barGap: '80%',
+                data: [
+                  {
+                    value: '122',
+                    itemStyle: {
+                      normal: {
+                        color: ['#ff5249']
+                      }
+                    },
+
+                  },
+                  {
+                    value: '291',
+                    itemStyle: {
+                      normal: {
+                        color: ['#fe3288']
+                      }
+                    },
+                  },
+                  {
+                    value: '100',
+                    itemStyle: {
+                      normal: {
+                        color: ['#c529ce']
+                      }
+                    },
+                  },
+                  {
+                    value: '40',
+                    itemStyle: {
+                      normal: {
+                        color: ['8f4ada']
+                      }
+                    },
+                  },
+                  {
+                    value: '120',
+                    itemStyle: {
+                      normal: {
+                        color: ['#5373e3']
+                      }
+                    },
+                  },
+                ]
+              }
+              ]
+            };
+            _this.chart13Options = options;
+            _this.chart = echarts.init(document.getElementById("chart13"));
+            _this.chart.setOption(options);
+          } else {
+            _this.chart13Options = null;
+            _this.chart13Img = false;
+          }
+          ;
+
+
+        });
+
+      }
+      ,
+      fncharts21: function (id) {
+
+        var _this = this
+        axios.get('static/data/yuqingfenxi.json', {}).then(function (res) {
+          var qingganzoushi = res.data.qingganfenxi.qingganzoushi;
+          if (qingganzoushi) {
+            var legendData = [];
+            var seriesData = []
+            var colors = ['#0787e8', '#ff4800', '#ffc600']
+            var options = {
+
+              tooltip: {
+                trigger: 'axis',
+                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                  type: 'line'        // 默认为直线，可选为：'line' | 'shadow'
+                }
+              },
+              grid: {
+                left: 10,
+                right: 20,
+                bottom: 10,
+                top: 50,
+                containLabel: true
+              },
+              legend: {
+                data: ['优质企业', '普通企业', '黑名单企业'],
+                textStyle: {
+                  color: '#a9a9a9'
+                },
+                icon: 'circle'
+              },
+              xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                axisTick: {
+                  show: false
+                },
+                axisLine: {
+                  lineStyle: {
+                    color: '#01c2db'
+                  }
+                },
+                splitLine: {
+                  show: false
+                },
+                axisLabel: {
+                  textStyle: {
+                    color: "#75849c"
+                  }
+                },
+                data: ['1月', '2月', '3月', '4月', '5月', '6月']
+
+              },
+              yAxis: {
+                name: '',
+                type: 'value',
+                axisTick: {
+                  show: false
+                },
+                splitLine: {
+                  show: false
+                },
+                axisLine: {
+                  lineStyle: {
+                    color: '#01c2db'
+                  }
+                },
+
+              },
+
+              series: [
+                {
+                  name: '优质企业',
+                  type: 'line',
+                  stack: '总量',
+                  smooth: true,
+                  symbolSize: 6,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#00ffd8'
+                    }
+                  },
+                  data: [15, 12, 24, 21, 39, 18]
+                },
+                {
+                  name: '普通企业',
+                  type: 'line',
+                  stack: '总量',
+                  smooth: true,
+                  symbolSize: 6,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#fcff00'
+                    }
+                  },
+                  data: [40, 35, 63, 37, 51, 23]
+                },
+                {
+                  name: '黑名单企业',
+                  type: 'line',
+                  stack: '总量',
+                  smooth: true,
+                  symbolSize: 6,
+                  areaStyle: {
+                    normal: {
+                      opacity: .2
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      color: '#ff3c00'
+                    }
+                  },
+                  data: [10, 16, 12, 8, 11, 10]
+                }
+              ]
+            };
+            _this.chart21Options = options;
+            _this.chart = echarts.init(document.getElementById("chart21"));
+            _this.chart.setOption(options);
+          } else {
+            _this.chart21Options = null;
+            _this.chart21Img = false;
+          }
+          ;
+
+
+        });
+
+      }
+      ,
+      fncharts22: function (id) {
+
+        var _this = this
+        axios.get('static/data/yuqingfenxi.json', {}).then(function (res) {
+          var qingganfenxi = res.data.qingganfenxi.qingganfenxi;
+          if (qingganfenxi) {
+            var legendData = [];
+            var seriesData = []
+            var colors = ['#0787e8', '#ff4800', '#ffc600']
+
+            var options = {
+              title: {
+                text: '死亡人数',
+                left: 'center',
+                top: '40%',
+                textStyle: {
+                  fontSize: 14,
+                  color: '#fff'
+                }
+              },
+
+              tooltip: {
+                show: false,
+                formatter: "{d}%",
+                backgroundColor: 'none',
+                textStyle: {
+                  fontSize: 20
+                }
+              },
+              calculable: true,
+              series: [
+
+                {
+                  name: '',
+                  type: 'pie',
+                  center: ['50%', '48%'],
+                  radius: [30, 50],
+
+                  labelLine: {
+                    normal: {
+                      length: 6,
+                      length2: 30
+                    }
+                  },
+                  label: {
+                    normal: {
+                      position: 'outside',
+                      show: true,
+                      formatter: "{b}：\n\n{d}%",
+                      textStyle: {
+                        fontSize: 12
+                      }
+                    }
+                  },
+                  data: [
+                    {
+                      value: 220,
+                      name: '微博',
+                      icon: 'circle',
+                      itemStyle: {    //数据填充
+                        normal: {
+                          color: '#ff5757',          //颜色填充
+                        }
+                      },
+
+
+                    },
+                    {
+                      value: 170, name: '微信', icon: 'circle', itemStyle: {      //数据填充
+                      normal: {
+                        color: '#ff7e3e',           //颜色填充
+                      }
+                    },
+
+                    },
+                    {
+                      value: 170, name: '博客', icon: 'circle', itemStyle: {    //数据填充
+                      normal: {
+                        color: '#0084ff',           //颜色填充
+                      }
+                    },
+
+                    },
+                    {
+                      value: 160, name: '论坛', icon: 'circle', itemStyle: {   //数据填充
+                      normal: {
+                        color: '#19d600',           //颜色填充
+                      }
+                    },
+
+                    },
+
+                  ]
+                },
+
+              ]
+            };
+            _this.chart22Options = options;
+            _this.chart = echarts.init(document.getElementById("chart22"));
+            _this.chart.setOption(options);
+          } else {
+            _this.chart22Options = null;
+            _this.chart22Img = false;
+          }
+          ;
+
+
+        });
+
+      }
+      ,
+      fncharts23: function (id) {
+
+        var _this = this
+        axios.get('static/data/yuqingfenxi.json', {}).then(function (res) {
+          var fumianxinxilaiyuan = res.data.qingganfenxi.fumianxinxilaiyuan;
+          if (fumianxinxilaiyuan) {
+            var legendData = [];
+            var seriesData = []
+            var colors = ['#0787e8', '#ff4800', '#ffc600']
+            var options = {
+              tooltip: {
+                trigger: 'item',
+                formatter: "{b} :{c}家"
+              },
+              series: [
+                {
+                  name: '',
+                  type: 'pie',
+                  radius: ['20%', '60%'],
+                  roseType: 'area',
+                  itemStyle: {
+                    normal: {
+                      color: function (params) {
+                        var colorList = ['#81f594', '#58c16b', '#0787e8', '#00ac1d', '#ffc600', '#ff4800'];
+                        return colorList[params.dataIndex]
+                      }
+                    }
+                  },
+                  label: {
+                    normal: {
+                      formatter: '{b} \n {d}%',
+                      textStyle: {fontSize: 12}
+                    }
+                  },
+                  data: [
+                    {
+                      value: 126,
+                      name: 'A级企业',
+                      itemStyle: {
+                        normal: {
+                          barBorderColor: '#817026',
+                          color: 'rgba(28,247,72,.7)'
+                        },
+                        emphasis: {
+                          barBorderColor: '#867115',
+                          color: 'rgba(28,247,72,.9)'
+
+                        }
+                      }
+                    },
+                    {
+                      value: 243,
+                      name: 'B级企业',
+                      itemStyle: {
+                        normal: {
+                          barBorderColor: '#817026',
+                          color: 'rgba(18,180,245,.7)'
+
+                        },
+                        emphasis: {
+                          barBorderColor: '#867115',
+                          color: 'rgba(18,180,245,.9)'
+
+                        },
+                        label: {
+                          show: true,
+                          position: 'top',
+                          formatter: '{b}\n{c}%'
+                        }
+                      }
+                    },
+                    {
+                      value: 403,
+                      name: 'C级企业',
+                      itemStyle: {
+                        normal: {
+                          barBorderColor: '#817026',
+                          color: 'rgba(255,209,31,.7)'
+                        },
+                        emphasis: {
+                          barBorderColor: '#867115',
+                          color: 'rgba(255,209,31,.9)'
+                        }
+                      }
+                    },
+                    {
+                      value: 377,
+                      name: 'D级企业',
+                      itemStyle: {
+                        normal: {
+                          barBorderColor: '#817026',
+                          color: 'rgba(247,23,23,.7)'
+                        },
+                        emphasis: {
+                          barBorderColor: '#867115',
+                          color: 'rgba(247,23,23,.9)'
+
+                        }
+                      }
+                    }
+
+                  ]
+
+                }
+              ]
+            };
+            _this.chart23Options = options;
+            _this.chart = echarts.init(document.getElementById("chart23"));
+            _this.chart.setOption(options);
+          } else {
+            _this.chart23Options = null;
+            _this.chart23Img = false;
+          }
+          ;
+
+
+        });
+
+      }
+      ,
+      fncharts31: function (id) {
+
+        var _this = this
+        axios.get('static/data/yuqingfenxi.json', {}).then(function (res) {
+          var ditu = res.data.diyufenbu.ditu;
+          var paihangbangs = res.data.diyufenbu.paihangbang;
+          _this.areaRankings = paihangbangs;
+          if (ditu) {
+            var legendData = [];
+            var seriesData = []
+            var colors = ['#0787e8', '#ff4800', '#ffc600']
+            var options = {
+              tooltip: {
+                trigger: 'item',
+                backgroundColor: 'rgba(255,255,255,0.7)',
+                borderColor: '#ff3333',
+                textStyle: {
+                  color: '#333',
+                  fontSize: 15
+                },
+                borderWidth: 1,
+                formatter: "<a style='color:#ff0000;font-weight:600; font-size:16px;'>{b}省</a> <br> 诉讼案件<a style='color:#ff5a00;font-weight:600; font-size:16px;'>{c}</a>起",
+                padding: 10,
+              },
+              visualMap: {
+                type: 'piecewise',
+                itemWidth: 10,
+                itemHeight: 12,
+                splitNumber: 4,
+                min: 10,
+                max: 40,
+                left: '30',
+                top: 'bottom',
+                text: ['高','低'],           // 文本，默认为数值文本
+                calculable: true,
+                color:['#f90068','#08dfff'],
+              },
+              series: [
+                {
+                  name: 'iphone3',
+                  type: 'map',
+                  mapType: 'china',
+                  roam: false,
+                  label: {
+                    normal: {
+                      show: false
+                    },
+                    emphasis: {
+                      show: false
+                    }
+                  },
+                  data: [
+                    {name: '北京', selected: false, value: 10},
+                    {name: '天津', selected: false, value: 20},
+                    {name: '上海', selected: false, value: 30},
+                    {name: '重庆', selected: false, value: 40},
+                    {name: '河北', selected: false, value: 10},
+                    {name: '河南', selected: false, value: 20},
+                    {name: '云南', selected: false, value: 30},
+                    {name: '辽宁', selected: false, value: 40},
+                    {name: '黑龙江', selected: false, value: 10},
+                    {name: '湖南', selected: false, value: 20},
+                    {name: '安徽', selected: false, value: 30},
+                    {name: '山东', selected: false, value: 40},
+                    {name: '新疆', selected: false, value: 10},
+                    {name: '江苏', selected: false, value: 20},
+                    {name: '浙江', selected: false, value: 30},
+                    {name: '江西', selected: false, value: 40},
+                    {name: '湖北', selected: false, value: 10},
+                    {name: '广西', selected: false, value: 20},
+                    {name: '甘肃', selected: false, value: 30},
+                    {name: '山西', selected: false, value: 40},
+                    {name: '内蒙古', selected: false, value: 10},
+                    {name: '陕西', selected: false, value: 20},
+                    {name: '吉林', selected: false, value: 30},
+                    {name: '福建', selected: false, value: 40},
+                    {name: '贵州', selected: false, value: 10},
+                    {name: '广东', selected: false, value: 20},
+                    {name: '青海', selected: false, value: 30},
+                    {name: '西藏', selected: false, value: 40},
+                    {name: '四川', selected: false, value: 10},
+                    {name: '宁夏', selected: false, value: 20},
+                    {name: '海南', selected: false, value: 30},
+                    {name: '台湾', selected: false, value: 40},
+                    {name: '香港', selected: false, value: 10},
+                    {name: '澳门', selected: false, value: 20}
+                  ],//各省地图颜色数据依赖value
+                }
+              ]
+            };
+            _this.chart31Options = options;
+            _this.chart = echarts.init(document.getElementById("chart31"));
+            _this.chart.setOption(options);
+          } else {
+            _this.chart31Options = null;
+            _this.chart31Img = false;
+          }
+          ;
+
+
+        });
+
+      }
+    }
+    ,
+    created() {
+      var _this = this;
+      setTimeout(function () {
+        _this.fncharts11();
+        _this.fncharts12();
+        _this.fncharts13();
+      }, 500)
+
+    },
+    components: {
+      'v-footerTab': footerTab,
+      'v-share': share,
+    }
+
+  }
+
+
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+  /* swipe */
+  .icongou {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    color: red;
+  }
+
+  .title {
+    height: 45px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10001001;
+    background: #1c2532;
+    font-size: 16px;
+  }
+
+  .chartimg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+  }
+
+  .title h2 {
+    width: 108px;
+    height: 44px;
+    line-height: 44px;
+    color: #dbdbdb;
+    margin: 0 auto;
+  }
+
+  .title .time {
+    display: block;
+    width: 35px;
+    height: 35px;
+    font-size: 35px;
+    position: absolute;
+    color: #ffffff;
+    right: 54px;
+    top: 4px;
+  }
+
+  .title .xiala {
+    color: #ffffff;
+  }
+
+  .title .share {
+    display: block;
+    width: 25px;
+    height: 27px;
+    position: absolute;
+    right: 17px;
+    top: 8px;
+    color: #ffffff;
+    font-size: 27px;
+  }
+
+  .bigTitle-item li {
+    width: 100%;
+    line-height: 30px;
+    height: 30px;
+    background: #1c2532;
+
+  }
+
+  .active {
+    color: #ffffff;
+  }
+
+  .red-icon {
+    display: block;
+    height: 2px;
+    width: 80%;
+    margin: 0 auto;
+    background: #ff3333;
+  }
+
+  .tabTitle {
+    width: 100%;
+    height: 45px;
+    line-height: 45px;
+    position: fixed;
+    left: 0;
+    top: 43px;
+    z-index: 10000999;
+    background: #fafafa;
+  }
+
+  .tabTitle-item {
+    text-align: center;
+    float: left;
+    width: 33%;
+    color: #8a8a8a;
+    font-size: 14px;
+  }
+
+  .timeSelect {
+    width: 100%;
+    height: 43px;
+    position: fixed;
+    background: white;
+    left: 0;
+    top: 43px;
+    z-index: 10001000;
+    border-top: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+  }
+
+  .timeSelect-left {
+    width: 25%;
+    float: left;
+    height: 43px;
+    line-height: 43px;
+    text-align: center;
+  }
+
+  .timeSelect-right {
+    width: 75%;
+    float: left;
+    height: 43px;
+    display: flex;
+  }
+
+  .timeSelect-right-item {
+    flex: 1;
+  }
+
+  .time-item {
+    background: #f2f2f2;
+    border: 1px solid #f2f2f2;
+    border-radius: 5px;
+    width: 66px;
+    height: 26px;
+    line-height: 26px;
+    margin-top: 8px;
+    padding-left: 10px;
+  }
+
+  .time-item i {
+    margin-right: 3px;
+  }
+
+  .active4 {
+    border: 1px solid red;
+  }
+
+  .tabContent {
+    padding: 88px 0 60px 0;
+    background: #f4f4f4;
+  }
+
+  .active5 {
+    color: red;
+  }
+
+  .moudle {
+    margin-top: 10px;
+  }
+
+  .moudleTitle {
+    height: 42px;
+    background: #f4f4f4;
+    text-indent: 10px;
+    line-height: 42px;
+    color: #000000;
+  }
+
+  .moudleContent {
+    background: #FFF;
+  }
+
+  #chart11 {
+    height: 274px;
+  }
+
+  #chart12 {
+    height: 210px;
+  }
+
+  #chart13 {
+    height: 210px;
+  }
+
+  #chart21 {
+    height: 274px;
+  }
+
+  #chart22 {
+    height: 210px;
+  }
+
+  #chart23 {
+    height: 210px;
+  }
+
+  #chart31 {
+    height: 220px;
+  }
+
+  .moudle31 {
+    margin-top: 28px;
+  }
+  .moudle23,.moudle13{
+    margin-bottom: 18px;
+  }
+  .moudle32 {
+    margin-top: 24px;
+    margin-bottom: 20px;
+  }
+  .moudle32 .moudleContent{
+    padding-bottom: 14px;
+  }
+  .informationtip {
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  .informationtip dt {
+    height: 42px;
+    line-height: 42px;
+    color: #8a8a8a;
+    font-size: 14px;
+    position: relative;
+    padding-left: 22px;
+  }
+
+  .informationtip dd {
+    height: 42px;
+    line-height: 42px;
+    color: #6c6c6c;
+    padding-left: 22px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    position: relative;
+    background: #edfbfd;
+  }
+
+  .informationtip dd .informationtip3 {
+    color: #66c4ff;
+  }
+
+  .informationtip dd .informationtip1 {
+    color: #66c4ff;
+  }
+
+  .informationtip dd:nth-of-type(1) {
+    background: #fee5f0;
+
+  }
+
+  .informationtip dt .informationtip1 {
+    border: 1px solid #FFF;
+  }
+
+  .informationtip dd:nth-of-type(1) .informationtip1 {
+    background: #fe4767;
+    border: 1px solid #fe4767;
+    color: #FFF;
+  }
+
+  .informationtip dd:nth-of-type(1) .informationtip3 {
+    color: #f90468;
+  }
+
+  .informationtip dd:nth-of-type(2) {
+    background: #f1ebf9;
+
+  }
+
+  .informationtip dd:nth-of-type(2) .informationtip1 {
+    background: #b149f2;
+    border: 1px solid #b149f2;
+    color: #FFF;
+  }
+
+  .informationtip dd:nth-of-type(2) .informationtip3 {
+    color: #b449f5;
+  }
+
+  .informationtip dd:nth-of-type(3) {
+    background: #e5f5fe;
+
+  }
+
+  .informationtip dd:nth-of-type(3) .informationtip1 {
+    background: #07d6ff;
+    border: 1px solid #07d6ff;
+    color: #FFF;
+  }
+
+  .informationtip dd:nth-of-type(3) .informationtip3 {
+    color: #00ddfe;
+  }
+
+  .informationtip1, .informationtip2, .informationtip3 {
+    display: block;
+    text-align: center;
+  }
+
+  .informationtip .informationtip1 {
+    position: absolute;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #66c4ff;
+  }
+
+  .informationtip2 {
+    width: 80%;
+  }
+
+  .informationtip3 {
+    width: 20%;
+  }
+
+  .fl {
+    float: left;
+  }
+
+  .beizhu {
+    font-size: 12px;
+    text-align: right;
+    color: #8a8a8a;
+  }
+
+  .footerTab {
+    z-index: 10000000;
+  }
+
+</style>

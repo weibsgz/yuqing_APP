@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <link href="./css/reset.css" rel="stylesheet">
+  <link href="./css/index.css" rel="stylesheet">
+  <title>舆情大数据</title>
+
+</head>
+<body>
+<div class="warp">
+  <div class="module module1">
+    <h2>九次方大数据带您数说“美国总统竞选”舆情专题</h2>
+    <div class="detail">
+      <div class="detail-left"><img class="logo" src="./images/logo_03.png" alt="">九次方大数据</div>
+      <div class="detail-right">生成时间：2017年12月15日</div>
+    </div>
+  </div>
+  <div class="module module2">
+    <div class="content">
+      九次方大数据在监测周期2017年2月8日14：30至2017年2月15日14：30分围绕关键词“美国+总统”对互联网上的相关舆情进行了深入分析，共监测相关舆论文章26789篇，舆论最高峰出现在2017年2月10日，共有1567条相关文章，详细分析如下：
+    </div>
+  </div>
+  <div class="module module3">
+    <div class="charttitle">声量走势</div>
+    <div class="chartContent">
+      <div id="chart1"></div>
+    </div>
+    <div class="chartDetail">从声量走势中可看出舆情的爆发点是xxxx，微博数据
+      较为突出。</div>
+  </div>
+  <div class="module module4">
+    <div class="charttitle">媒体类型覆盖</div>
+    <div class="chartContent">
+      <div id="chart2"></div>
+    </div>
+    <div class="chartDetail">在所有传播媒体类型中，新闻为主要传播媒体阵营，
+      舆情信息数量占总数的56.8%。</div>
+  </div>
+  <div class="module module5">
+    <div class="charttitle">媒体来源排行</div>
+    <div class="chartContent">
+      <div id="chart3">
+
+      </div>
+    </div>
+    <div class="chartDetail">在媒体来源中，新浪微博对此次事件的曝光力度最大，舆情信息占所有媒体之首，在7天内有291条舆情信息，新华网位居第二，有122条舆情信息。</div>
+  </div>
+  <div class="module module6">
+    <div class="charttitle">情感分布</div>
+    <div class="chartContent">
+      <div id="chart4">
+
+      </div>
+    </div>
+    <div class="chartDetail">监测期内，当前主题负面舆情占比较大，占比86%，负面舆情主要集中在“川普发文怒怼梅姨:失败者希拉里的马屁精”。</div>
+  </div>
+  <div class="module module7">
+    <div class="charttitle">情感走势</div>
+    <div class="chartContent h250">
+      <div id="chart5"></div>
+    </div>
+    <div class="chartDetail">通过情感走势图可看出占比最大的负面舆情在7月19
+      日达到峰值，7月22日后趋于平稳。</div>
+  </div>
+  <div class="module module8">
+    <div class="charttitle">地域分布</div>
+    <div class="chartContent h300">
+      <div id="chart6"></div>
+    </div>
+  </div>
+  <div class="module module9">
+    <div class="informationtip">
+      <dl>
+        <dt><span class="fl informationtip1">排名</span><span class="fl informationtip2">省份</span><span
+          class="fl informationtip3">信息数</span></dt>
+        <dd>
+          <span class="fl informationtip1">01</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+        <dd>
+          <span class="fl informationtip1">02</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+        <dd>
+          <span class="fl informationtip1">03</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+        <dd>
+          <span class="fl informationtip1">04</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+        <dd>
+          <span class="fl informationtip1">05</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+        <dd>
+          <span class="fl informationtip1">06</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+        <dd>
+          <span class="fl informationtip1">07</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+        <dd>
+          <span class="fl informationtip1">08</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+        <dd>
+          <span class="fl informationtip1">09</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+        <dd>
+          <span class="fl informatliontip1">10</span><span
+          class="fl informationtip2">北京</span><span class="fl informationtip3">2293</span>
+        </dd>
+      </dl>
+      <div class="beizhu">(注：显示排名前十的省份)</div>
+    </div>
+  </div>
+  <div class="module module10">
+    <p class="detail">通过舆情地域分布可得出沿海一带对“美国总统”的舆情指数较高，除此之外，北京、广东、江苏的舆情关注度也很高。</p>
+    <div class="erweimaContent">
+      <img class="erweima" src="./images/weixin_03.png" alt="">
+    </div>
+
+    <p class="xiazai">下载九次方舆情监测手机app，关注更多舆情事件</p>
+  </div>
+</div>
+
+<script src="./js/echarts.min.js"></script>
+<script src="./js/china.js"></script>
+<script src="./js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+// The Vue build version to load with the `import` command
+// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
+import Vue from 'vue'
+import MintUI from 'mint-ui'
+import App from './App'
+import router from './router'
+import {formatDate} from 'common/js/date'
+import store from './store'
+import axios from 'axios'
+import { Toast  } from 'mint-ui';
+import qs from 'qs'
+/* eslint-disable no-new */
+Vue.use(MintUI)
+//axios.defaults.baseURL="http://localhost:9996"
+axios.defaults.baseURL="http://192.168.20.126:8080"
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+
+// // 添加请求拦截器
+// axios.interceptors.request.use(function (config) {
+//   // 在发送请求之前做些什么
+//   config={
+//     // `paramsSerializer` 是一个负责 `params` 序列化的函数
+//     // (e.g. https://www.npmjs.com/package/qs, http://api.jquery.com/jquery.param/)
+//     paramsSerializer: function(params) {
+//       return qs.stringify(params, {arrayFormat: 'brackets'})
+//     },
+//     // `timeout` 指定请求超时的毫秒数(0 表示无超时时间)
+//     // 如果请求话费了超过 `timeout` 的时间，请求将被中断
+//     timeout: 3000,
+//   }
+//   return config;
+// }, function (error) {
+//   // 对请求错误做些什么
+//   return Promise.reject(error);
+// });
+// 添加响应拦截器
+axios.interceptors.response.use(function (response) {
+  console.log("调用后台成功：",response)
+  if(response.data.code==0){
+    return response;
+  }else{
+    Toast(response.data.message);
+    return Promise.reject(response);
+  }
+}, function (error) {
+  // 对响应错误做点什么
+  Toast(error);
+  return Promise.reject(error);
+});
+
+new Vue({
+  el: '#app',
+  store,
+  router:router,
+  template: '<App/>',
+  components: { App }
+})
+
+Vue.filter('formatDate',function(time){
+    let date = new Date(time)
+    return formatDate(date,'yyyy-MM-dd hh:mm')
+})
+
+router.beforeEach(({meta, path}, from, next) => {
+  var { auth = true } = meta
+  var isLogin = Boolean(store.state.user.id) //true用户已登录， false用户未登录
+  if ( auth&&!isLogin && path !== '/login') {
+    return next({ path: '/login' })
+  }
+  next()
+})
+
+// router.beforeEach((to, from, next) => {
+//   if(router.app.user) {
+//     console.log('登录成功正常跳转');
+//     next();
+//   } else {
+//     console.log('请先登录')
+//     next()
+//   }
+// });
+//路由默认加载页
+router.push('yuqingdongtai')

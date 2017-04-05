@@ -1,0 +1,324 @@
+<!-- 文章详情页 -->
+<template>
+    <div class="detail-wrapper">
+      <!--   {{selectedItem.title}}
+       {{selectedItem.detail}} -->
+       <div class="detailTop">
+         <p class="title">{{selectedItem.title}}</p>
+         <div class="bars">
+            <span>{{selectedItem.source}}</span>
+            <span>{{selectedItem.time | formatDate}}</span>
+            <span class="sourceToLink"><a v-bind:href="selectedItem.link">原文链接</a></span>
+         </div>         
+       </div>
+       <div class="detail-content">
+           {{selectedItem.detail}}
+        </div>
+        <div class="detail-footer">
+          <span class="back" @click='closePanel'> 
+             <i class="iconfont icon-fanhui"></i>
+          </span>
+
+          <span class="share">
+              <i class="iconfont icon-fenxiang"></i>
+          </span>
+
+          <span class="warn" @click="showbottomWarnTip">
+             <i class="iconfont icon-icons64x6479"></i>
+          </span>
+
+          <span class="fav" @click="toFav">
+             <i class="iconfont" :class="{'icon-ttpodicon':!fav,'icon-hongxin-copy':fav}"></i>
+          </span>
+        </div>
+
+
+        <mt-popup id="mtp" v-model="popupVisibleDetailTip" popup-transition="popup-fade" 
+        position="bottom" :modal=false>
+            <div class="warnTip">
+               <div class="warnCont">
+                  <dl>
+                    <dt>推送级别:</dt>
+                    <dd>                    
+                       <span v-for="(item,index) in tab.tuisong" :class="{'active':index === tuisongIndex}" @click="chooseTab(index,item)">{{item.name}}</span>
+                    </dd>
+                  </dl>
+
+                  <dl>
+                    <dt>发送类型:</dt>
+                    <dd>                          
+                         <span v-for="(item,index) in tab.type" :class="{'active':index === typeIndex}" @click="changeType(index,item)">{{item.name}}</span>
+                            
+                        <input v-show="typeIndex === 0" v-model="phoneNumber" class="sendInput" placeholder="手机号码" />
+                        <input v-show="typeIndex === 1" v-model="email" class="sendInput" placeholder="电子邮件" />
+                    </dd>
+                  </dl>
+
+                  <dl>                  
+                    <dt>推送内容:</dt>
+                    <dd>                     
+                      <textarea class="sendTextarea" v-model="_sendTitle"></textarea> 
+                    </dd>
+                  </dl>
+               </div> 
+               <div class="warnTipBottom">  
+                   <span @click="sendWarn" class="sendBtn">推送</span>                
+                   <span @click='popupVisibleDetailTip = false'>取消</span>
+                 
+               </div>
+            </div>
+        </mt-popup>
+        
+        <div class="mengceng" v-show="popupVisibleDetailTip" transition name="fade"></div>
+    </div>
+</template>
+<script>
+import Vue from 'vue'
+import {formatDate} from 'common/js/date'
+import {Popup,Radio,Toast } from 'mint-ui';
+export default {
+    name:'detail',
+    data() {
+        return {
+          popupVisibleDetailTip:false,
+          picked:'yellow',
+          pickedType:'sms',
+          warnTxt:"",
+          tuisongIndex:0,
+          typeIndex:0,
+          phoneNumber:"",
+          email:"",  
+          sendTitle:"",
+          fav:false,
+          tab:{
+            "tuisong":[
+               {"name":"黄色级别"},
+               {"name":"红色级别"},
+               {"name":"橙色级别"}
+            ],
+            "type":[
+               {"name":"手机号码","phoneNumber":""},
+               {"name":"电子邮件","email":""},
+            ]
+          }
+        }
+    },
+    props: {
+        selectedItem: {
+            type: Object
+        }
+    },   
+    computed:{    
+
+      //v-model绑定一个_sendTitle作为中间状态  不能直接绑定data里的title 否则无限循环
+       _sendTitle: {
+          // getter
+          get: function () {
+            return '【九次方舆情推送】'+this.selectedItem.title;
+          },
+          // setter
+          set: function (newValue) {
+            console.log(this.sendTitle)
+          
+            this.sendTitle = newValue
+          }
+        }
+    },
+    methods:{
+     
+      closePanel:function(){
+        this.$emit('closePanel', 'close');
+        //selectedItem.popupVisibleContent=false
+      },
+      showbottomWarnTip:function(){
+        this.popupVisibleDetailTip = true;    
+
+      },
+
+      toFav:function(){
+          alert(this.fav)
+         this.fav = !this.fav;
+      },
+      chooseTab:function(index,item){     
+      
+          this.tuisongIndex = index;          
+          this.tab['tuisong'].forEach(v=>{
+              v.checked = false;
+            })
+          this.$set(item,'checked',true)
+
+
+      },
+      changeType:function(index,item){
+          this.typeIndex = index;          
+          this.tab['type'].forEach(v=>{
+              v.checked = false;
+            })
+          this.$set(item,'checked',true)
+
+
+      },     
+      sendWarn:function(){        
+        var sendObj = {
+            "tuisong":"",
+            "type":{},
+            "sendTitle":""
+        };       
+
+      
+
+        //推送级别
+        this.tab['tuisong'].forEach((v,i)=>{
+            if (v.checked) {
+               //console.log(key+':'+v.value)
+               sendObj['tuisong'] = v.name;               
+            }
+            //没有被选的
+            else{
+              sendObj['tuisong'] = '黄色级别'
+            }      
+        })
+
+        //发送类型
+        this.tab['type'].forEach((v,i)=>{
+            if (v.checked) {              
+               sendObj['type'] = {};
+               sendObj['type']['name'] = v.name;
+               
+               if(v.name === "手机号码"){
+                  sendObj["type"]['value'] = this.phoneNumber;
+               }
+               else{
+                  sendObj["type"]['value'] = this.email;
+               }                
+            }
+            //没有选
+            else{
+                 sendObj['type'] = {};
+                 sendObj['type']['name'] = '手机号码';
+                 sendObj["type"]['value'] = this.phoneNumber;
+            }      
+        })
+
+        //推送内容
+          sendObj['sendTitle'] = this.sendTitle;
+
+        console.log('推送标题'+this.sendTitle)
+        console.log("sendObj: " + JSON.stringify(sendObj))
+
+        this.popupVisibleDetailTip = false;
+        Toast({
+          message: '预警成功',
+          position: 'middle',
+          duration: 1000,
+          className:'toast1'
+        });
+      }
+    },
+    filters:{
+            /*在js/data.js中创建方法*/
+            formatDate(time){
+                let date = new Date(time)
+                return formatDate(date,'yyyy-MM-dd hh:mm')
+            }
+    },
+  
+     components:{
+      formatDate,Popup,Radio,Toast 
+    }
+
+}
+</script>
+<style>
+.detail-wrapper{
+  padding: 15px;
+  padding-top: 0;
+}
+.detailTop .title{font-size: 20px;line-height: 24px;}
+.bars{margin-top: 15px; border-bottom: 1px solid #ccc; padding-bottom: 10px;}
+.bars span{margin-right: 20px; color: #8a8a8a;}
+.bars span.sourceToLink{float: right; color: #ff3333; margin-right: 0;}
+.bars span.sourceToLink a{ color: #ff3333;}
+
+.detail-content{padding-top: 15px; font-size: 16px;}
+.detail-footer{
+    width: 100%;
+    height: 50px; 
+    line-height: 50px; 
+    background: #fafafa; 
+    position: fixed; 
+    bottom: 0; 
+    left: 0;
+    color: #666;
+}
+.detail-footer .back{ font-size: 20px; margin-left: 15px; float: left; }
+.detail-footer .warn, .detail-footer .share, .detail-footer .fav{float: right; margin-right: 15px;}
+.detail-footer span i{font-size: 24px;}
+
+
+
+.mint-popup-bottom {
+    top: auto;
+    right: auto;
+    bottom: 0;
+    left: 50%;
+    -webkit-transform: translate3d(-50%,0,0);
+    transform: translate3d(-50%,0,0);
+}
+
+.mengceng{    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+    background: #000;}
+
+#mtp{
+   width: 100vw;
+   height: 70%!important;
+   overflow: auto;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s
+}
+.fade-enter, .fade-leave-active {
+  opacity: 0
+}
+.warnTip{position: relative; height: 100%; box-sizing: border-box; padding: 20px; padding-top: 0}
+.warnTipBottom{
+  
+  height: 80px; 
+  width: 100%;
+  box-sizing: border-box; 
+  padding-bottom: 10px;
+}
+
+.warnTipBottom span{width:100%; display:block; height: 40px; line-height: 40px;
+background-color: blue; text-align: center; color: #fff; margin: 0 auto; padding: 0 20px;
+box-sizing: border-box; margin-top: 15px; border-radius: 3px; background-color: #fafafa;
+color: #ff3333;}
+
+.warnTipBottom span.sendBtn{background-color: #ff3333 ; color: #fff;}
+
+.warnCont dl{ margin-top: 15px }
+.warnCont dl dt{ line-height: 35px; font-size: 15px;  }
+.warnCont dl dd{  }
+.warnCont dl dd span{ display: inline-block; width: 80px; height: 30px; line-height: 30px;
+border-radius: 3px; background-color: #efefef; color: #666;text-align: center;
+margin-right: 15px; }
+
+.warnCont dl dd span.active{background-color: #ff3333; color: #fff;}
+.sendInput{width: 100%; height: 40px; line-height: 40px; background-color: #ebebeb; margin-top: 10px; padding-left: 15px; box-sizing: border-box;}
+
+.sendTextarea{width: 100%; height: 60px; line-height: 24px; background-color: #ebebeb; margin-top: 10px; padding-left: 15px; box-sizing: border-box; border: none;}
+
+
+/*.warnCont dl dd input, .warnCont dl dd label{display: inline-block;}
+.warnCont dl dd input{margin-right: 10px;}
+.warnTxt{width: 95%;height: 80px;}*/
+
+.toast1{z-index: 999999!important}
+.mint-toast{z-index: 99999!important}
+</style>

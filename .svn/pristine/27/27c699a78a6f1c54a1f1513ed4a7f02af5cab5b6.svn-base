@@ -1,0 +1,50 @@
+// The Vue build version to load with the `import` command
+// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
+import Vue from 'vue'
+import MintUI from 'mint-ui'
+import App from './App'
+import router from './router'
+import {formatDate} from 'common/js/date'
+import store from './store'
+import axios from 'axios'
+/* eslint-disable no-new */
+
+Vue.use(MintUI)
+
+//Vue.use(VueResource)
+axios.defaults.baseURL="http://localhost:9996"
+
+
+new Vue({
+  el: '#app',
+  store,
+  router:router,
+  template: '<App/>',
+  components: { App }
+})
+
+Vue.filter('formatDate',function(time){
+    let date = new Date(time)
+    return formatDate(date,'yyyy-MM-dd hh:mm')
+})
+
+router.beforeEach(({meta, path}, from, next) => {
+  var { auth = true } = meta
+  var isLogin = Boolean(store.state.user.id) //true用户已登录， false用户未登录
+  if ( auth&&!isLogin && path !== '/login') {
+    return next({ path: '/login' })
+  }
+  next()
+})
+
+// router.beforeEach((to, from, next) => {
+//   if(router.app.user) {
+//     console.log('登录成功正常跳转');
+//     next();
+//   } else {
+//     console.log('请先登录')
+//     next()
+//   }
+// });
+//路由默认加载页
+router.push('yuqingdongtai')

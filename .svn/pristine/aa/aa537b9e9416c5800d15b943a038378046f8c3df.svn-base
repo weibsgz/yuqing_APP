@@ -1,0 +1,45 @@
+/**
+ * Created by zeng on 2017/2/27.
+ */
+//判断是浏览器还是APP中
+var isAppClient= function(){
+  var ua = navigator.userAgent;
+  var isAppClient = ((ua.indexOf('AndroidOpinionClient')>-1) || (ua.indexOf('iOSOpinionClient')>-1));
+  if(isAppClient) {
+    return true;
+  }else {
+    return false;
+  }
+}()
+//判断是浏览器还是APP中
+var isAndorid= function(){
+  var ua = navigator.userAgent;
+  var isAndorid = (ua.indexOf('AndroidOpinionClient')>-1);
+  if(isAndorid) {
+    return true;
+  }else {
+    return false;
+  }
+}()
+
+global.version=function (ver) {
+  return '<var>new</var>'+ver;
+};
+
+global.isupdate=function (type,ver){//0、无更新1、有更新
+  // console.log(type)
+  // console.log(ver)
+  if(type==0){
+    alert('无更新')
+  }else {
+      // version='<var>new</var>'+ver;
+  alert('有更新，版本号为：'+ver)
+    // sessionStorage.setItem('version', '<var>new</var>'+ver)
+    // version('<var>new</var>'+ver);
+  }
+  // console.log('version:',version)
+}
+
+export {isAppClient,isAndorid}
+
+

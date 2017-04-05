@@ -1,0 +1,251 @@
+<template lang="html">
+  <div class="subject-mangement" :class="{show:$store.state.personal.flag}">
+    <div class="header">
+      <span class='iconfont icon-caret back' @click='close()'></span>
+      <span v-if="editem.themeId">编辑主题</span>
+      <span v-else>新建主题</span>
+      <span class=""></span>
+    </div>
+    <div class="formlist-wrap">
+      <div class="formlist">
+        <span>设置监测主题</span>
+        <input type="text" placeholder='设置主题名称' :value='getDataTN(editem.themeName)' id='name'>
+      </div>
+      <div class="formlist">
+        <span>设置关联词</span>
+        <p class="tip">最多可设置10组关键词，每组字数30个字以内，可空格区分。例如：“天津 爆炸”，这是一组关键词。</p>
+        <div><input type="text" placeholder='设置关联词' id='keyWordsItem'><em class="addBtn" @click="addKeywords"><span class='iconfont icon-jiahao1'></span></em></div>
+        <div class="addkeywords" v-if="editem.keywords"><span  v-for="(item, index) in editem.keywords"><em>{{item}}</em><i class="iconfont icon-cha1" @click="delItem(index)"></i></span></div>
+        <div class="addkeywords" v-else><span  v-for="(item, index) in keyWords"><em>{{item}}</em><i class="iconfont icon-cha1" @click="delItem(index)"></i></span></div>
+      </div>
+      <div class="formlist">
+        <span>设置排除词</span>
+        <p class="tip">最多可设置15组排除词，每组字数10个字以内，可空格区分</p>
+        <input type="text" name=""  placeholder='设置排除词'  :value='getDataNO(editem.noquerykeywords)' id='unkeyWords'>
+      </div>
+      <button class="btn"  @click='submit()'>完成</button>
+    </div>
+  </div>
+</template>
+
+<script>
+  import Vue from 'vue';
+  import store from '../../../store'
+  import axios from 'axios';
+  import qs from 'qs';
+  import { Toast } from 'mint-ui';
+
+  export default {
+    data() {
+      return {
+        themeName:'',
+        keyWords: [],
+        noquerykeywords:'',
+        urllink:'themeapp/createTheme'
+      }
+    },
+    props:['editem','themesList'],
+    methods: {
+      getDataTN(data){
+        if(data){
+          return data;
+        }else{
+          return this.themeName;
+        }},
+      getDataNO(data){
+        if(data){
+          return data;
+        }else{
+          return this.noquerykeywords;
+        }},
+      submit() {
+        let  _this=this;
+        let thname=document.querySelector('#name').value;
+        let nowords=document.querySelector('#unkeyWords').value;
+        if (_this.editem.themeId) {
+          _this.urllink="/themeapp/editThemeInfo";
+          let  keyWordsVal= this.editem.keywords.join(",");
+          var params = {
+            'themeId':_this.editem.themeId,
+            'themeName':thname,
+            "keyWords":keyWordsVal,
+            'excludeKeyWords':nowords
+          }
+        }else{
+          let  keyWordsVal= this.keyWords.join(",");
+          var params = {
+            'userId':this.$store.state.user.userId,
+            'themeName':thname,
+            "keyWords":keyWordsVal,
+            'excludeKeyWords':nowords
+          }
+        }
+        axios.post(_this.urllink,qs.stringify(params)).then(function (res) {
+          if(res.data.code==0){
+            _this.$emit("fetchTheme");
+            _this.close()
+            Toast({
+              message: '提交成功',
+            });
+          }
+        });
+      },
+      close() {
+        document.querySelector('#keyWordsItem').value=""
+        this.themeName="";
+        this.noquerykeywords="";
+        this.keyWords=[];
+        store.commit('increment')
+      },
+      addKeywords:function () {
+        if(document.getElementById('keyWordsItem').value==""){
+          Toast({
+            message: '请输入关联词',
+          });
+          return;
+        }
+        this.themeName=document.getElementById('name').value;
+        this.noquerykeywords=document.getElementById('unkeyWords').value;
+        if(this.editem.keywords){
+          this.editem.keywords.push(document.getElementById('keyWordsItem').value)
+        }else {
+          this.keyWords.push(document.getElementById('keyWordsItem').value)
+        }
+      },
+      delItem:function (ind) {
+        if(this.editem.keywords){
+          this.editem.keywords.splice(ind,1)
+        }else{
+          this.keyWords.splice(ind,1)
+        }
+      }
+    },
+    store,
+    mounted:function(){
+      // this.themesList=this.editem;
+    },
+    components:{
+    }
+  }
+</script>
+
+<style lang="css" scoped>
+  /*.inwrap{display: none}*/
+  .subject-mangement{
+    width: 100vw;
+    height: calc(100vh);
+    position: fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    background: #fff;
+    display: none;
+  }
+  .inner{
+    width: 100vw;
+    height: 100%;
+
+  }
+  .formlist-wra{
+    flex: 1;
+  }
+  div.show{
+    display: block;
+    display: flex;
+
+  }
+  .header{
+    height: 45px;
+    background: #ccc;
+    line-height: 45px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    background: #1c2532;
+    color: #fff;
+    font-size: 16px;
+  }
+  .header .icon-jiahao{
+    font-size: 26px;
+
+  }
+  .header .back{
+    font-size: 32px;
+    transform: rotate(90deg);
+    display: inline-block;
+  }
+  .formlist-wrap{
+    flex: 1;
+    padding:30px;
+  }
+  .formlist{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 30px;
+  }
+  .formlist span{
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: #000;
+  }
+  .formlist input{
+    height: 40px;
+    padding: 0 10px;
+    background: #ebebeb;
+    border-radius: 5px;
+    outline: none;
+  }
+  .formlist .tip{
+    line-height: 1.2;
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: #999;
+  }
+  .btn{
+    height: 40px;
+    border-radius: 5px;
+    color: #fff;
+    background: #ff3333;
+    display: block;
+    border:none;
+    width: 100%;
+    font-size: 15px;outline: none;
+  }
+  #keyWordsItem{
+    width: 75%;
+  }
+  .addBtn{
+    width: 40px;
+    height: 40px;
+    float: right;
+    background: #ff3333;
+    border-radius: 5px;
+    text-align: center;
+    line-height: 40px;
+  }
+  .addBtn span{
+    color: #fff;
+    font-size: 20px;
+  }
+  .addkeywords{
+    margin-top: 10px;
+  }
+  .addkeywords em{
+    height: 30px;
+    padding: 5px 10px;
+    border:1px solid #ff3333;
+    border-radius: 5px;
+    line-height: 40px;
+    color: #ff3333;
+  }
+  .addkeywords i{
+    color: #ff3333;
+    position: relative;
+    bottom: 12px;
+    right: 8px;
+  }
+</style>

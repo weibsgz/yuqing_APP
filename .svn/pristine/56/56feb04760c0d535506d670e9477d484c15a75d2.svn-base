@@ -1,0 +1,78 @@
+<template>
+    <div class="shareBox">
+      <div class="shareTit">分享到</div>
+      <ul class="shareCont">
+        <li @click="sharePYQ">
+          <p class="shareImg"><img src="./share_weChat.png"> </p>
+          <p >微信朋友圈</p>
+        </li>
+        <li @click="shareWXFrd">
+          <p class="shareImg"><img src="./share_weChatF.png"> </p>
+          <p>微信好友</p>
+        </li>
+        <li @click="shareQQFrd">
+          <p class="shareImg"><img src="./share_qq.png"> </p>
+          <p>QQ好友</p>
+        </li>
+        <li @click="qqZone">
+          <p class="shareImg"><img src="./share_qZone.png"> </p>
+          <p>QQ空间</p>
+        </li>
+      </ul>
+      <div class="shareBot" @click="closePopup">取消</div>
+    </div>
+</template>
+
+<script>
+  //引入组件
+  //创造构造器
+  export default {
+    data(){
+      return{
+       // value:this.show
+      }
+    },
+    props:{option:{
+      type:Object
+    }},
+    components: {
+
+    },
+    methods:{
+      sharePYQ: function () {
+        this.$emit('upLoadImg','timeLine');
+        alert(this.$store.state.user.userId)
+        alert(213)
+      },
+      shareWXFrd: function () {
+        this.$emit('upLoadImg','appMessage');
+        alert(navigator.userAgent);
+        alert(213)
+      },
+      shareQQFrd:function () {
+        this.$emit('upLoadImg','QQ');
+        alert(this.option.title)
+      },
+      qqZone: function () {
+        this.$emit('upLoadImg','QZone');
+      },
+      isMobile:function () {
+        alert(navigator.userAgent);
+      },
+      closePopup:function () {
+        this.$emit('closePanel', 'close');
+      }
+    },
+  }
+</script>
+
+<style scoped>
+
+  .shareBox{display: flex;flex-flow:column nowrap;justify-content:space-between;align-items:center;height:100%;}
+  .shareTit{font-size:18px;line-height:60px;}
+  .shareCont{display: flex;flex-flow:row nowrap;justify-content:space-around;width:96%;}
+  .shareCont li p{width:70px;height:70px;display: flex;justify-content: center;align-items: center;}
+  .shareBot{font-size:18px;line-height:50px;color:#f33;border-top:1px solid #ccc;width:100%;justify-content:center;text-align: center;background:#fafafa;}
+  .shareImg{background:#fff;border-radius: 50%;text-align: center;}
+  .shareImg img{width:70%;height:auto;border-radius:35px;}
+</style>

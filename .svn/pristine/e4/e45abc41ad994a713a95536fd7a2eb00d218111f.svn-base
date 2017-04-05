@@ -1,0 +1,343 @@
+<template>
+  <div class='userWrap'>
+    <div class="wrap">
+      <div class="user-center-wrap">
+        <div class="info-box">
+          <div class="head-img">
+            <img src="./components/images/people.png" alt="">
+          </div>
+          <div class="user-info">
+            <p class="name">{{$store.state.user.userName}}</p>
+            <p><span class="iconfont icon-shouji"></span>：{{$store.state.user.id}}</p>
+            <p>过期时间：{{$store.state.user.stopeTime}}</p>
+          </div>
+        </div>
+        <div class="item">
+          <span class="fl"><span class='iconfont icon-zhuti'></span>主题管理</span>
+          <div class="fr" @click='change()'>
+            <span> <var>剩余配额&nbsp;&nbsp;{{themeCon}}</var>	</span>
+            <span class='iconfont icon-quanjugengduojiantou-copy'></span>
+          </div>
+        </div>
+        <div class="item">
+          <span class="fl"><span class='iconfont icon-shezhi1'></span>推送设置</span>
+          <span class='iconfont icon-quanjugengduojiantou-copy fr' @click="pushchange()" ></span>
+        </div>
+        <div class="item">
+          <span class="fl"><span class='iconfont icon-kaiguan'></span>推送消息<i class="red-point" style="margin-left: 5px;"></i></span>
+          <span class='iconfont icon-quanjugengduojiantou-copy fr' @click='PushNews()'></span>
+        </div>
+        <div class="item  mb13">
+          <span class="fl"><span class='iconfont icon-collect'></span>收藏夹</span>
+          <span class='iconfont icon-quanjugengduojiantou-copy fr' @click='showFavorites()'></span>
+        </div>
+        <div class="item" v-show="isAndorid" @click='checkUpdata()'>
+          <span class="fl"><span class='iconfont icon-gengxin'></span>检查更新</span>
+          <div class="fr">
+            <span ref="checkShow">
+              {{$store.state.user.versionName}}
+              <!--<var>new</var>	v1.2.1-->
+            </span>
+            <span class='iconfont icon-quanjugengduojiantou-copy'></span>
+          </div>
+        </div>
+        <div class="item mb13">
+          <span class="fl"><span class='iconfont icon-guanyu' ></span>关于</span>
+          <span class='iconfont icon-quanjugengduojiantou-copy fr'  @click="about()" ></span>
+        </div>
+        <div class="item mb13">
+          <span class="fl"><span class='iconfont icon-mima'></span>修改密码</span>
+          <span class='iconfont icon-quanjugengduojiantou-copy fr' @click="openPop('ee')"></span>
+        </div>
+        <div class="item out" @click='signout'>
+          退出登录
+        </div>
+      </div>
+      <mt-popup class="wh100" v-model="pss.aa" position="right">
+        <SubectManagement ref="SubectManagement" :themeCon="themeCon" v-on:onChangePss="onChangePss"></SubectManagement>
+      </mt-popup>
+      <mt-popup class="wh100" v-model="pss.bb" position="right">
+        <PushSetting ref="PushSetting" v-on:onChangePss="onChangePss"></PushSetting>
+      </mt-popup>
+      <mt-popup class="wh100" v-model="pss.cc" position="right">
+        <AboutComponent  v-on:onChangePss="onChangePss"></AboutComponent>
+      </mt-popup>
+      <mt-popup class="wh100" v-model="pss.dd" position="right">
+        <PushNews v-on:onChangePss="onChangePss"></PushNews>
+      </mt-popup>
+      <mt-popup class="wh100" v-model="pss.ee" position="right">
+        <ChangePwd  v-on:onChangePss="onChangePss"></ChangePwd>
+      </mt-popup>
+      <mt-popup class="wh100" v-model="pss.ff" position="right">
+        <Favorites  v-on:onChangePss="onChangePss"></Favorites>
+      </mt-popup>
+    </div>
+    <footerTab></footerTab>
+  </div>
+</template>
+
+<script>
+  import {Popup,Toast} from 'mint-ui';
+  import footerTab from 'components/footerTab/footerTab';
+  import SubectManagement from './components/SubjectManagement';
+  import PushNews from './components/PushNews';
+  import PushSetting from './components/PushSetting';
+  import Favorites from './components/Favorites';
+  import AboutComponent from './components/About.vue';
+  import ChangePwd from './components/ChangePwd.vue';
+//  import store from '../../store';
+  import { mapActions } from 'vuex'
+  import { USER_SIGNOUT } from 'store/user'
+  import {isAndorid} from 'common/js/common'
+  import axios from 'axios'
+  import qs from 'qs'
+  export default {
+    data(){
+      return{
+        pss:{aa:false,bb:false,cc:false,dd:false,ee:false,ff:false},
+//        off:{aa:false,bb:false,cc:false,dd:false,ff:false},
+        isAndorid:!!isAndorid,
+        themeCon:0
+      }
+    },
+    created(){
+      var _this=this;
+      axios.post('themeapp/themeCount', qs.stringify({'userId':this.$store.state.user.userId})).then(function (res) {
+        if(res.data.code==0){
+          _this.themeCon=res.data.count;
+        }
+      });
+    },
+    methods:{
+      ...mapActions([USER_SIGNOUT]),
+    signout() {
+      this.USER_SIGNOUT()
+      this.$router.replace({ path: '/login' })
+    },
+    change() {//主题管理
+//      alert(isAppClient)
+      this.$refs.SubectManagement.fetchTheme();
+      this.pss.aa=!this.pss.aa;
+    }
+    ,showFavorites(){ //收藏夹
+      this.pss.ff=!this.pss.ff;
+//    this.$refs.Favorites.fetchTheme();
+    }
+    ,pushchange(){//推送设置
+      this.pss.bb=!this.pss.bb;
+      this.$refs.PushSetting.fetchTheme();
+    },
+    PushNews(){//推送消息
+      this.pss.dd=!this.pss.dd;
+//      this.off.dd=true;
+//    this.$refs.PushNews.fetchTheme();
+    },
+    about(){ //关于
+      this.pss.cc=!this.pss.cc;
+//      this.off.cc=true;
+      this.$refs.PushSetting.fetchTheme();
+    },
+    openPop(name){
+      this.pss[name]=!this.pss[name];
+    },
+    onChangePss(val){
+      this.pss[val] =!this.pss[val];
+    },
+    checkUpdata(){
+//      alert("check://update")
+      window.location.href="check://update"
+    },
+    isupdate(type,version){//0、无更新1、有更新
+        if(type==0){
+          Toast('无更新')
+        }else {
+          this.$ref.checkShow.innerHTML="<var>new</var>"+version;
+        }
+    }
+//    onResultChange(val){
+//      this.pss=val;
+//    }
+  },
+  components:{
+    footerTab,
+      SubectManagement,
+      Favorites,
+      PushNews,
+      PushSetting,
+      AboutComponent,
+      ChangePwd
+  },
+  }
+</script>
+<!--<style>-->
+  <!--@keyframes moveFromRight {-->
+    <!--from {transform: translateX(100%); }-->
+    <!--to {transform: translateX(0%); }-->
+  <!--}-->
+  <!--@keyframes moveFromRight2 {-->
+    <!--from {transform: translateX(0%); }-->
+    <!--to {transform: translateX(100%); }-->
+  <!--}-->
+  <!--div.showCpts{-->
+    <!--/*visibility:visible;*/-->
+    <!--animation: moveFromRight .3s ease both;-->
+  <!--}-->
+  <!--div.hideCpts{-->
+    <!--/*visibility:visible;*/-->
+    <!--animation: moveFromRight2 .3s ease both;-->
+    <!--/*display: none;*/-->
+  <!--}-->
+<!--</style>-->
+<style scoped>
+	.fl{float:left; height:45px; line-height: 45px;}
+	.fr{float:right;height:45px; line-height: 45px;}
+  html,
+  body {
+    font-size: 62.5%!important;
+  }
+  .userWrap{
+    display: -webkit-box;
+    display: flex;
+    width: 100vw;
+    height: calc(100vh);
+    flex-direction: column;
+  }
+  .wrap{
+    width: 100vw;
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+    background: #efefef;
+    box-sizing: border-box;
+  }
+  .user-center-wrap {
+    /*display: flex;
+    flex: 1;*/
+    width: 100vw;
+    flex-direction: column;
+    background: #efefef;
+		height:100%;
+  }
+  /*div.footerTab{*/
+  /*position: static!important;*/
+  /*}*/
+  .info-box {
+    /*display: -webkit-box;
+    display: flex;*/
+    justify-content: space-around;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 0 15px;
+    background: url('/static/img/user-center-bg_01.png') no-repeat;
+    background-size: cover;
+    margin-bottom: 13px;
+  }
+
+  .info-box p {
+    /*display: -webkit-box;
+    display: flex;*/
+    justify-content: center;
+    font-size: 13px;
+    color: #fff;
+    margin-bottom: 8px;
+    align-items: center;
+    
+    text-align: center;
+  }
+
+  .info-box p.name {
+    font-size: 18px;
+    color: #fff;
+    font-weight: bolder;
+    margin-bottom: 15px;
+  }
+
+  .icon-quanjugengduojiantou-copy {
+    display: inline-block;
+    /*transform: rotate(270deg);*/
+    font-size: 15px;
+    color: #666;
+  }
+
+  .head-img {
+    width: 80px;
+    height: 80px;
+    /*margin-bottom: 10px;*/
+    margin:0 auto 10px;
+  }
+
+  .head-img img {
+    border-radius: 50%;
+    height: 80px;
+    width: 80px;
+  }
+
+  .item {
+    /*display: flex;*/
+    justify-content: space-between;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 0 20px;
+    align-items: center;
+    height: 45px;
+    box-sizing: border-box;
+  }
+  .mb13{
+    margin-bottom: 13px;
+  }
+  .item span>.iconfont{
+    margin-right: 15px;
+    color: #666666;
+  }
+  .item>div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pushMsg {
+    flex-direction: column;
+    padding: 0 10px;
+  }
+  .pushMsg p {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 0;
+    align-items: center;
+  }
+  .pushMsg p:nth-child(1) {
+    border-bottom: 1px solid #eee
+  }
+  var {
+    font-style: normal;
+    color: red;
+  }
+  .out {
+    justify-content: center;
+    padding: 15px 0;
+    font-size: 1.4rem;
+    color: red;
+    text-align: center;
+    /*height: 45px;*/
+  }
+  .red-point{
+    position: relative;
+  }
+  .red-point:after {
+    display: inline-block;
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: red;
+    border-radius: 50%;
+    position: absolute;
+    right: -4px;
+    top:-4px;
+  }
+  .wh100{
+    height: 100vh;
+    width: 100vw;
+  }
+</style>

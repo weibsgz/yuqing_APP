@@ -1,0 +1,17 @@
+/**
+ * Created by zeng on 2017/2/27.
+ */
+//判断是浏览器还是APP中
+var isAppClient= function(){
+  var ua = navigator.userAgent;
+  var isAppClient = ((ua.indexOf('AndroidOpinionClient')>-1) || (ua.indexOf('iOSOpinionClient')>-1));
+  if(isAppClient) {
+    return true;
+  }else {
+    return false;
+  }
+}()
+
+export {isAppClient}
+
+

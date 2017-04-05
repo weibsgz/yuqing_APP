@@ -1,0 +1,84 @@
+<template>
+    <div class="dataTipsWarp">
+        <div class="dataTipsBox">
+            <p class="num">404</p>
+            <p class="dataTipsText">数据君回数据星河了...</p>
+            <div class="dataTipsImg"></div>
+            <div class="btnBox">
+                <div class="return" @click="back">返回</div>
+                <div class="refresh" @click="refresh">刷新</div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+export default{
+  name:'notFound',
+  methods:{
+      back:function () {
+        this.$router.back()
+      },
+      refresh:function () {
+        //this.$router.go(0);
+        this.$router.back()
+      }
+  }
+}
+</script>
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style>
+
+ .dataTipsWarp {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 888;
+    background-color: #fff;
+    text-align: center;
+}
+ .dataTipsWarp:before {
+    content: '';
+    height: 100%;
+    display: inline-block;
+    vertical-align: middle;
+}
+.dataTipsWarp .dataTipsBox {
+    display: inline-block;
+    vertical-align: middle;
+    border-radius: 5px;
+    padding: 15px;
+}
+.dataTipsBox .dataTipsImg {
+    display: inline-block;
+    width: 146px;
+    height: 131px;
+    background: url(img/notFound.png)center no-repeat ;
+    background-size: 100%;
+}
+.dataTipsBox .dataTipsText {
+    color: #7a7a7a;
+    margin-bottom: 35px;
+    font-size: 16px;
+    letter-spacing: 3px;
+}
+.dataTipsBox .num {
+    color: #7a7a7a;
+    margin-bottom: 15px;
+    font-size: 32px;
+    letter-spacing: 3px;
+}
+.dataTipsBox .btnBox {
+    font-size: 0; margin-top: 100px;
+}
+.dataTipsBox .btnBox div{
+    display: inline-block; width: 150px; height: 43px; line-height: 45px; border-radius: 5px;  background-color: #fff; font-size: 15px;
+}
+.btnBox .return {
+    border: 1px solid #8a8a8a; color: #8a8a8a; margin-right: 20px;
+}
+.btnBox .refresh {
+    border: 1px solid #ff3333; color: #ff3333;
+}
+</style>

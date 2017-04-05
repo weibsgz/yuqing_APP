@@ -1,0 +1,89 @@
+<template>
+  <div class="about-wrapper">
+    <div class="title"><i class="iconfont icon-fanhui"  @click="closeAboutPanel()"></i>关于</div>
+    <div class="content">
+      <div class="logo">
+        <img src="./images/logo.png" alt="">
+      </div>
+      <div class="description">
+        <p>大数据舆情监测平台，有多年的大数据舆情运营经验主要服务于政府、企业、银行； 拥有海量的行业数据；完整的舆情监测理论体系；科学、专业的舆情工作体制。</p>
+        <p>采用先进的互联网舆情监测技术实时监测搜集整理使用单位关心的热点、言论、动向、趋势，并提供分析的软件系统。帮助各使用单位及时掌握舆情动向，做到对有较大影响的重要事件快速发现、快速处理，从正面引导舆论和宣传，构建积极向上的主流舆论。
+        </p>
+      </div>
+      <div class="contact">
+        <p>联系人：<span>易女士</span></p>
+        <p>邮  箱：<span>yil@jusfoun.com</span></p>
+        <p>电  话：<span>010-56010119</span></p>
+        <p class="address">地   址：<span>北京市海淀区王庄路1号清华同方
+          科技广场D座西楼16层</span></p>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import Vue from 'vue'
+  export default {
+    name: 'AboutComponent',
+    data() {
+      return {
+
+      }
+    },
+    methods: {
+      closeAboutPanel(){
+        this.$emit('closePanel');
+    }
+    }
+  }
+</script>
+<style scoped>
+  .title {
+    height: 42px;
+    line-height: 42px;
+    text-align: center;
+    color: #FFF;
+    position: relative;
+    background: #1c2532;
+    font-size: 16px;
+  }
+.icon-fanhui{
+  position: absolute;
+  left: 10px;
+  width: 20px;
+  height: 42px;
+  font-size: 22px;
+  line-height: 42px;
+}
+  .content {
+    width: 80%;
+    margin: 0 auto;
+  }
+  .logo{
+    height: 140px;
+    position: relative;
+  }
+  .logo img{
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+  }
+  .description{
+    font-size: 14px;
+    color: #666666;
+    line-height: 24px;
+    margin-bottom: 14px;
+  }
+  .contact{
+    font-size: 14px;
+    color: #000000;
+    line-height: 30px;
+  }
+  .address{
+    color: #1c2532;
+  }
+</style>

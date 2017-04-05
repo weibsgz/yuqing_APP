@@ -1,0 +1,243 @@
+<template>
+<div>
+    <div class="search-res">
+        <div class="res-top">
+            <i @click="fanhui" class="iconfont icon-fanhui"></i>
+            <span>搜索结果</span>
+        </div>
+        <mt-loadmore :top-method="loadTop" :bottom-method="loadBottom" ref="loadmore">
+            <ul class="res-ct">
+                <li v-for="(item, index) in news">
+                    <div class="res-title">
+                        <h3>{{item.title}}</h3>
+                        <span class="tag" :class="item.grade | gradeClass">{{item.grade | newsTag}}</span>
+                    </div>
+                    <div class="res-detail">
+                        <div>
+                            <span>信息类型:</span>
+                            <span>{{item.type}}</span>
+                        </div>
+                        <div>
+                            <span>来源:</span>
+                            <span>{{item.source}}</span>
+                        </div>
+                        <div>
+                            <span>{{item.time | formatDate}}</span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div slot="top" class="mint-loadmore-top">
+                <span v-show="topStatus !== 'loading'" :class="{ 'rotate': topStatus === 'drop' }">松开加载最新数据</span>
+                <span v-show="topStatus === 'loading'">加载完毕</span>
+            </div>
+        </mt-loadmore>
+    </div>
+</div>
+</template>
+
+<script>
+    //引入组件
+    import axios from 'axios';
+    import BScroll from 'better-scroll';
+    import {
+        Popup,
+        Loadmore
+    } from 'mint-ui';
+    // import footerTab from 'components/footerTab/footerTab'
+
+    export default{
+        name: 'advancedSearchRes',
+        data() {
+            return {
+                messageTypeIndex: 0,
+                emotionTypeIndex: 0,
+                timeAreaIndex: 0,
+                news: [],
+                selectedPage: {},
+                topStatus: '',
+                page: 1
+            }
+        },
+        components: {
+            Popup,
+            // Loadmore
+        },
+        props: {
+            filter: {
+                type: Object
+            }
+        },
+        created() {
+            this.$nextTick(function() {
+                this.render();
+                // setTimeout(this._initScroll, 500)
+            })
+        },
+        methods: {
+            render: function() {
+                var _this = this;
+                axios.get('static/data/yuqingdongtai.json', {
+                        params: {
+                            page: this.page
+                        }
+                    })
+                    .then(function(res) {
+                        // console.log(res)
+                        _this.news = res.data.news;
+                        _this.keyWords = res.data.keyWords
+                        _this.condFilter = res.data.condFilter;
+                        // console.log(res.condFilter)
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    });
+            },
+            fanhui: function () {
+                this.$emit('fanhuiEvent', 'advancedSearchRes');
+            },
+            // _initScroll() {
+            //     this.keyWordScroll = new BScroll(this.$refs.wrapper, {
+            //         scrollX: true,
+            //         scrollY: false,
+            //         click: true
+            //     });
+
+            // },
+            loadTop(id) {
+                //刷新列表
+                this.page = 1;
+                this.render();
+                this.$refs.loadmore.onTopLoaded();
+                console.log('正在下拉')
+            },
+            loadBottom(id) {
+                // 加载更多数据
+
+                console.log('正在上拉加载。。')
+
+
+                var _this = this;
+
+                let pageup = this.page++;
+                axios.get('static/data/yuqingdongtai.json', {
+                        params: {
+                            page: pageup
+                        }
+                    })
+                    .then(function(res) {
+                        console.log('上拉中的axios读取成功');
+                        _this.news.push(
+                            ...res.data.news2
+                        )
+                        _this.allLoaded = true; // 若数据已全部获取完毕
+                        _this.$refs.loadmore.onBottomLoaded();
+
+                        ;
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    });
+
+                //this.news = (this.news).concat(this.news);
+            }
+        },
+        filters: {
+            newsTag: function(value) {
+                switch (value) {
+                    case 0:
+                        return '正面'
+                        break;
+                    case 1:
+                        return '中性'
+                        break;
+                    case 2:
+                        return '负面'
+                        break;
+                    default:
+                }
+            },
+            gradeClass: function (value) {
+                switch (value) {
+                    case 0:
+                        return 'tag-safe'
+                        break;
+                    case 1:
+                        return 'tag-middle'
+                        break;
+                    case 2:
+                        return 'tag-danger'
+                        break;
+                    default:
+                }
+            }
+        }
+    }
+
+
+
+
+
+</script>
+
+<style scoped>
+    .res-ct {
+        background: #fff;
+    }
+    /*搜索结果样式*/
+    .res-top {
+        position: relative;
+        height: 40px;
+        line-height: 40px;
+        font-size: 20px;
+        background: #F2F2F2;
+        text-align: center;
+    }
+    .res-top > i {
+        position: absolute;
+        left: 15px;
+    }
+    .res-ct li {
+        padding: 10px;
+        box-sizing: border-box;
+        /* height: 100px; */
+        border-bottom: 1px solid #ccc;
+    }
+    .res-title {
+        font-size: 0;
+        width: 100%;
+        margin-bottom: 15px;
+        line-height: 24px;
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .res-title > h3 {
+        font-size: 16px;
+        margin-right: 10px;
+    }
+    .tag {
+        min-width: 24px;
+        height: 20px;
+        border-radius: 3px;
+        padding: 2px 5px;
+        font-size: 12px !important;
+        color: #fff;
+        line-height: 20px;
+    }
+    .res-detail {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+    }
+    .tag-middle {
+        background-color: #55a4e1;
+    }
+    .tag-safe {
+        background-color: #35c870;
+    }
+    .tag-danger {
+        background-color: #ff6c6c;
+    }
+</style>

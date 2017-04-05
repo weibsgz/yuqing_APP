@@ -1,0 +1,95 @@
+<template lang="html">
+  <div class="inwrap" :class="{show:$store.state.personal.flag3}">
+    <div class="inner">
+      <div class="header">
+        <span class='iconfont icon-caret back' @click='close()'></span>
+      </div>
+      <div class="content">
+        <mt-loadmore :top-method="loadTop" :bottom-method="loadBottom"  ref="loadmore">
+          <ul>
+          <li class='log-box' v-for="item in logs">
+            <div class="date-title">{{item.timeT}}</div>
+            <div class="lists" v-for="list in item.lists">
+              <div class="time"><span>{{list.time}}</span></div>
+              <div class="content">
+                <div class="log-title">{{list.title}}</div>
+                <div class="log-other">
+                  <span class="label">
+                    {{list.label}}
+                  </span>
+                  <span class='warning-time'>
+                    预警时间：{{list.warningTime}}
+                  </span>
+                </div>
+              </div>
+            </div >
+          </li >
+          </ul>
+        </mt-loadmore>
+      </div>
+      <footerTab></footerTab>
+  </div>
+</div>
+
+</template>
+<script>
+import {
+  fetchLogs
+} from '../store/personalCenter';
+
+import footerTab from 'components/footerTab/footerTab';
+import store from '../../../store'
+export default {
+  data() {
+    return {
+      logs: []
+    }
+  },
+  methods: {
+    getLogs() {
+      fetchLogs().then(data => {
+        this.logs = eval(data)
+      })
+    },
+    close() {
+      store.commit('increment3')
+    },
+    loadTop() {
+      fetchLogs().then(data => {
+        this.logs=eval(data)
+         this.$refs.loadmore.onTopLoaded();
+      })
+    },
+    loadBottom() {
+      fetchLogs().then(data => {
+        this.logs.push(...eval(data))
+        this.allLoaded = true;// 若数据已全部获取完毕
+        this.$refs.loadmore.onBottomLoaded();
+      })
+    }
+  },
+  mounted: function() {
+    // this.getLogs()
+  },
+  components:{
+    footerTab
+  }
+}
+</script>
+
+<style lang="css" scoped>
+.loadMore{
+  height: calc(100vh - 100px);
+  overflow: auto;
+}
+.inner>.content{
+  flex:1;
+  overflow-y: auto;
+}
+.log-box .lists{
+  /*min-height: 100px;*/
+}
+.log-box{
+  border-bottom: 1px solid red;
+}
+</style>

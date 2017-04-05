@@ -1,0 +1,222 @@
+<template lang="html">
+  <div class="subject-mangement" :class="{show:$store.state.personal.flag}">
+    <div class="header">
+      <span class='iconfont icon-caret back' @click='close()'></span>
+      <span>新增推送</span>
+      <span class=""></span>
+    </div>
+    <div class="formlist-wrap">
+      <div class="formlist">
+      <span>主题名称</span>
+      <div>
+        <select>
+          <option>123</option>
+          <option>123222222222</option>
+          <option>123</option>
+          <option>123</option>
+        </select>
+      </div>
+      <div class="formlist">
+      <span>推送方式</span>
+       <div class="bgl">
+            <span>短信</span>
+            <span>邮件</span>
+        </div>
+      </div>
+      <div class="formlist">
+      <span>媒体类型</span>
+        <div class="bgl">
+            <span><i></i>全部</span>
+            <span>新闻</span>
+            <span>微信</span>
+            <span>新闻</span>
+            <span>微博</span>
+            <span>论坛</span>
+            <span>博客</span>
+            <span>贴吧</span>
+        </div>
+      </div>
+      <div class="formlist">
+      <span>推送时段</span>
+        <div>
+           <input type="time">至<input type="time">（时间相同 则全天提醒)
+        </div>
+      </div>
+      <div class="formlist">
+      <span>手机号</span>
+      <input type="text" name=""  placeholder='输入手机号' :value='editem.name'  id='name'>
+      </div>
+      <div class="formlist">
+      <span>邮箱</span>
+      <input type="text" name=""  placeholder='输入邮箱地址' :value='sparray(editem.keyWords)'  id='keyWords'>
+      </div>
+      <button class="btn"  @click='submit(editem)'>保存</button>
+    </div>
+  </div>
+</template>
+
+<script>
+import store from '../../../store'
+export default {
+  data() {
+    return {
+      keyWords: ''
+    }
+  },
+  props:['editem','themesList'],
+  methods: {
+    sparray(data){
+      if(data){
+        return data.join(" ")
+      }
+
+    },
+    submit(v) {
+        let name=document.querySelector('#name').value;
+        let keyWords=document.querySelector('#keyWords').value;
+        let unkeyWords=document.querySelector('#unkeyWords').value;
+        if(name&&keyWords&&unkeyWords){
+            if (v) {
+              this.editem.name=name
+              this.editem.keyWords=keyWords.split(" ")
+              this.editem.unkeyWords=unkeyWords
+            }else{
+              this.themesList.push({
+                  name:name,
+                  keyWords:keyWords.split(" "),
+                  unkeyWords:unkeyWords
+              })
+            }
+
+          this.close()
+        }
+    },
+    close() {
+      document.querySelector('#name').value=""
+      document.querySelector('#keyWords').value=""
+      document.querySelector('#unkeyWords').value=""
+      store.commit('increment')
+    }
+  },
+  store,
+  mounted:function(){
+    // this.themesList=this.editem;
+  },
+  components:{
+  }
+}
+</script>
+
+<style lang="css" scoped>
+.inwrap{display: none}
+.subject-mangement{
+  width: 100vw;
+  height: calc(100vh);
+  position: fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  background: #fff;
+  display: none;
+}
+.inner{
+  width: 100vw;
+  height: 100%;
+  
+}
+.formlist-wra{
+  flex: 1;
+}
+div.show{
+  display: block;
+  display: flex;
+
+}
+.header{
+  height: 50px;
+  background: #ccc;
+  line-height: 50px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  background: #1c2532;
+   color: #fff;
+   font-size: 18px;
+}
+.header .icon-jiahao{
+  font-size: 26px;
+
+}
+.header .back{
+  font-size: 32px;
+  transform: rotate(90deg);
+  display: inline-block;
+}
+.formlist-wrap{
+  flex: 1;
+  padding:30px;
+}
+.formlist{
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;
+}
+.formlist span{
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: #000;
+}
+.formlist input{
+ height: 40px;
+ padding: 0 10px;
+ background: #ebebeb;
+ border-radius: 5px;
+ outline: none;
+}
+.formlist select{
+ height: 40px;
+ padding: 0 10px;
+ border-radius: 5px;
+ background: #fff;
+ display: inline-block;
+ border:1px solid #ff3333;
+ outline: none;
+ color: #ff3333;
+ font-size: 13px;
+}
+.formlist .tip{
+  line-height: 1.2;
+  font-size: 12px;
+  margin-top: 5px;
+  color: #999;
+}
+.btn{
+  height: 40px;
+  border-radius: 5px;
+  color: #fff;
+  background: #ff3333;
+  display: block;
+  border:none;
+  width: 100%;
+  font-size: 15px;outline: none;
+}
+.bgl>span.active{
+  
+  border:1px solid #666666;
+  color: #666666;
+}
+.bgl>span{
+  line-height: 32px;
+  display: inline-block;
+  height: 32px;
+  padding: 0 20px;
+  border-radius: 3px;
+  border:1px solid #ff3333;
+  color: #ff3333;
+  margin-right: 5px;
+}
+</style>

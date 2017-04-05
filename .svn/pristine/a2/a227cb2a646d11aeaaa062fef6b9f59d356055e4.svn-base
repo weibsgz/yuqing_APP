@@ -1,0 +1,38 @@
+import Vue from 'vue'
+
+export default {
+    state: {
+      flag:false,
+      flag2:false,
+      flag3:false,
+      themesList:[]
+    },
+    mutations: {
+          flagInit(state){
+            state.flag=false,
+            state.flag2=false,
+            state.flag3=false
+          },
+          increment (state,item) {
+            // 变更状态
+            state.flag=!state.flag
+          },
+          increment2(state) {
+            // 变更状态
+            state.flag2=!state.flag2
+          },
+          increment3(state) {
+            // 变更状态
+            state.flag3=!state.flag3
+          }
+          ,pushthemesList(state,list){
+            state.themesList.push(list)
+          }
+          ,fetchthemesList(state,list){
+            state.themesList=list
+          }
+    },
+    actions: {
+
+    }
+}
